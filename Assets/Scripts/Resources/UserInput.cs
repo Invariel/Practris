@@ -1,15 +1,17 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
+using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 using static System.Runtime.CompilerServices.RuntimeHelpers;
 
 public class UserInput : MonoBehaviour
 {
     public Settings gameSettings;
-
-    public static int[] pressDurations = { 1, 20, 10, 10, 5, };
+    public static int[] pressDurations = { 1, 20, 15, 10, 5, };
 
     public int lastKeysPressed = (int)KeyPressed.None;
     public int currentKeysPressed = (int)KeyPressed.None;
@@ -17,6 +19,8 @@ public class UserInput : MonoBehaviour
 
     public int currentPressDuration = 0;
     public int keyPressDuration = 0;
+
+    public string filename = "./settings.json";
 
     private const int moving =
         (int)KeyPressed.Up |
@@ -28,9 +32,27 @@ public class UserInput : MonoBehaviour
         (int)KeyPressed.SpinLeft |
         (int)KeyPressed.SpinRight;
 
-    public void SendSettings (Settings settings)
+    public void LoadSettingsFromFile ()
     {
-        gameSettings = settings;
+        gameSettings = new Settings ();
+        if (File.Exists(filename))
+        {
+            string settings = File.ReadAllText(filename);
+            gameSettings = JsonSerializer.Deserialize<Settings>(settings);
+
+            // Verify no control overlap.  That would be not ideal.
+        }
+    }
+
+    public void SaveSettingsToFile ()
+    {
+        if (File.Exists(filename))
+        {
+            File.Delete(filename);
+        }
+
+        string settings = JsonSerializer.Serialize (gameSettings, new JsonSerializerOptions() { WriteIndented = true });
+        File.WriteAllText(filename, settings, System.Text.Encoding.UTF8);
     }
 
     public int GetKeysPressed { get { return relayedKeysPressed; } }
@@ -49,6 +71,11 @@ public class UserInput : MonoBehaviour
                 }
             }
         }
+    }
+
+    public static bool TestKey(KeyPressed pressedKey, int keysPressed)
+    {
+        return (keysPressed & (int)pressedKey) == (int)pressedKey;
     }
 
     // Update is called once per frame
@@ -106,26 +133,5 @@ public class UserInput : MonoBehaviour
         {
             relayedKeysPressed = ~lastKeysPressed & currentKeysPressed;
         }
-    }
-
-    public static int CheckKeys(IEnumerable keyCodes, KeyPressed value)
-    {
-        int retval = 0;
-
-        foreach (KeyCode keyCode in keyCodes)
-        {
-            if (Input.GetKey(keyCode))
-            {
-                retval += (int)value;
-                break;
-            }
-        }
-
-        return retval;
-    }
-
-    private bool TestKey(KeyPressed key, int? keysPressed)
-    {
-        return (keysPressed & (int)key) == (int)key;
     }
 }

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 using static Tetrominos;
 
@@ -49,12 +50,17 @@ public class GameBoard
 
                     if (y < _gameSurface.GetLength(1))
                     {
-                        _gameSurface[x, y] = Mino.CreateMino(_boardState[x, y], $"({x,2}, {y,2})", true);
+                        if (_gameSurface[x, y] is null)
+                        {
+                            _gameSurface[x, y] = Mino.CreateMino(_boardState[x, y], $"({x,2}, {y,2})", true);
+                        }
 
                         if (spacing == -1f)
                         {
                             spacing = _gameSurface[x, y].GetComponent<SpriteRenderer>().bounds.size.x;
                         }
+
+                        _gameSurface[x, y].GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>(Mino.GetMinoData(_boardState[x,y]).MinoSprite);
                     }
                 }
                 catch (Exception _)
@@ -64,6 +70,7 @@ public class GameBoard
             }
         }
     }
+
     public MinoEnum[,] CopyBoardState() => (MinoEnum[,])_boardState.Clone();
 
     public void DrawGameBoard ()
@@ -81,6 +88,30 @@ public class GameBoard
                 vector.x = spacing * (x - ((playfieldWidth - 2) / 2));
                 vector.y = spacing * (y - (visibleHeight / 2));
                 _gameSurface[x, y].transform.position = vector;
+            }
+        }
+    }
+
+    public void SetGameBoard(MinoEnum[,] newGameBoard)
+    {
+        for (int x = 1; x < _gameSurface.GetLength(0) - 1; ++ x)
+        {
+            for (int y = 1; y < _gameSurface.GetLength(1) - 1; ++ y)
+            {
+                _boardState[x, y] = newGameBoard[x, y];
+
+                if (y < _gameSurface.GetLength(1) - 1)
+                {
+                    try
+                    {
+                        var sr = _gameSurface[x, y].GetComponent<SpriteRenderer>();
+                        sr.sprite = Resources.Load<Sprite>(Mino.GetMinoData(newGameBoard[x, y]).MinoSprite);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw;
+                    }
+                }
             }
         }
     }
@@ -123,7 +154,7 @@ public class GameBoard
                             GameObject tile = Mino.CreateMino(pieceData.ThisMino, $"Next {pieceData.Name}", false);
 
                             SpriteRenderer sr = tile.GetComponent<SpriteRenderer>();
-                            sr.color = new UnityEngine.Color(1f, 1f, 1f, 1f - 0.75f * rightSide);
+                            sr.color = new UnityEngine.Color(1f, 1f, 1f, (rightSide == 0 ? 1f : 0.2f));
 
                             Vector3 vector = tile.transform.position;
                             vector.x = spacing / 2 * (leftTile + column);

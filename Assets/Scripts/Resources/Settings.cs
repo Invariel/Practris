@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[Serializable]
 public class Settings
 {
     public KeyCode[] Up             { get; set; } = new KeyCode[] { KeyCode.W, KeyCode.UpArrow };

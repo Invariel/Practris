@@ -1,0 +1,48 @@
+﻿{
+  "Up": [
+    119,
+    273
+  ],
+  "Down": [
+    115,
+    274
+  ],
+  "Left": [
+    97,
+    276
+  ],
+  "Right": [
+    100,
+    275
+  ],
+  "SpinLeft": [
+    122
+  ],
+  "SpinRight": [
+    120
+  ],
+  "HoldPiece": [
+    304,
+    303
+  ],
+  "RotationLeft": [
+    44
+  ],
+  "RotationRight": [
+    46
+  ],
+  "Rewind": [
+    91
+  ],
+  "Forward": [
+    93
+  ],
+  "Accept": [
+    13,
+    32
+  ],
+  "Menu": [
+    27
+  ],
+  "HardDrop": true
+}
