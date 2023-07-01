@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -43,6 +44,9 @@ public class GameEngine : MonoBehaviour
     private int _rotateRight = 1;
 
     // Game state stuff.
+    [SerializeField]
+    private TMP_Text text;
+
     public int linesCleared = 0;
     public int[] completedRows;
     private bool heldPieceThisMove = false;
@@ -66,6 +70,7 @@ public class GameEngine : MonoBehaviour
 
         heldPiece = null;
         linesCleared = 0;
+        UpdateLinesCleared();
 
         gameHistory = new();
 
@@ -87,6 +92,11 @@ public class GameEngine : MonoBehaviour
         }
 
         return newPiece;
+    }
+
+    public void UpdateLinesCleared ()
+    {
+        text.text = $"Lines {linesCleared}";
     }
 
     public void Update()
@@ -167,7 +177,7 @@ public class GameEngine : MonoBehaviour
         int keysPressed = userInput.GetKeysPressed;
 
         bool success = MovePiece(keysPressed);
-        success = success ? success : RotatePiece(keysPressed);
+        success |= RotatePiece(keysPressed);
         success = success ? success : HoldPiece(keysPressed);
         success = success ? success : ShowRotations(keysPressed);
         success = success ? success : TimeTravel(keysPressed);
@@ -308,6 +318,8 @@ public class GameEngine : MonoBehaviour
             if (gameHistory.Count > 0)
             {
                 linesCleared = 0;
+                UpdateLinesCleared();
+
                 _searchPosition = gameHistory.Count - 1;
 
                 gameState = GameState.Searching;
@@ -326,6 +338,8 @@ public class GameEngine : MonoBehaviour
         if (completedRows.Any())
         {
             linesCleared += completedRows.Length;
+            UpdateLinesCleared();
+
             StartCoroutine(gameBoard.ClearLines(completedRows));
 
             gameState = GameState.ClearingRows;

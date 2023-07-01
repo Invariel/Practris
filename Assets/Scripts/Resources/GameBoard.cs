@@ -245,7 +245,8 @@ public class GameBoard
                 }
                     
 
-                if (_boardState[location.X + column, location.Y - row] != MinoEnum.Empty)
+                if (_boardState[location.X + column, location.Y - row] != MinoEnum.Empty &&
+                    _boardState[location.X + column, location.Y - row] != MinoEnum.Shadow)
                 {
                     Debug.Log($"Piece collision at ({location.X + row}, {location.Y})");
                     validPlacement = false;

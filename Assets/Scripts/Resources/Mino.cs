@@ -61,8 +61,9 @@ public class MinoData
 public enum MinoEnum
 {
     Empty = 0,
-    Border = 1,
-    Preset = 2,
+    Shadow = 1,
+    Border = 2,
+    Preset = 3,
     I,
     J,
     L,

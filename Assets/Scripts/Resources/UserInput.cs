@@ -11,14 +11,14 @@ using static System.Runtime.CompilerServices.RuntimeHelpers;
 public class UserInput : MonoBehaviour
 {
     public Settings gameSettings;
-    public static int[] pressDurations = { 1, 20, 15, 10, 5, };
+    public static int[] timesToRegister = { 1, 30, 30, 30, 20, 20, 15, 10, 5, };
 
     public int lastKeysPressed = (int)KeyPressed.None;
     public int currentKeysPressed = (int)KeyPressed.None;
     public int relayedKeysPressed = (int)KeyPressed.None;
 
-    public int currentPressDuration = 0;
-    public int keyPressDuration = 0;
+    public int keysHeldDuration = 0;
+    public int timeToRegisterIndex = 0;
 
     public string filename = "./settings.json";
 
@@ -28,9 +28,18 @@ public class UserInput : MonoBehaviour
         (int)KeyPressed.Left |
         (int)KeyPressed.Right;
 
-    private const int rotating =
+    private const int rotation =
         (int)KeyPressed.SpinLeft |
         (int)KeyPressed.SpinRight;
+
+    private const int otherKeys =
+        (int)KeyPressed.Accept |
+        (int)KeyPressed.HoldPiece |
+        (int)KeyPressed.RotationLeft |
+        (int)KeyPressed.RotationRight |
+        (int)KeyPressed.Rewind |
+        (int)KeyPressed.Forward |
+        (int)KeyPressed.Menu;
 
     public void LoadSettingsFromFile ()
     {
@@ -55,7 +64,7 @@ public class UserInput : MonoBehaviour
         File.WriteAllText(filename, settings, System.Text.Encoding.UTF8);
     }
 
-    public int GetKeysPressed { get { return relayedKeysPressed; } }
+    public int GetKeysPressed { get => relayedKeysPressed; }
 
     public void CheckKeys(ref int keysPressed, IEnumerable keyCodes, KeyPressed value, List<KeyPressed> exclude = null)
     {
@@ -107,31 +116,39 @@ public class UserInput : MonoBehaviour
 
         lastKeysPressed = currentKeysPressed;
         currentKeysPressed = keysPressed;
+        relayedKeysPressed = 0;
 
-        if ((currentKeysPressed & (moving | rotating)) > 0)
+        int currentMovementPressed = keysPressed & moving;
+
+        int currentRotationPressed = keysPressed & rotation;
+        int lastRotationPressed = lastKeysPressed & rotation;
+
+        int currentOtherPressed = keysPressed & otherKeys;
+        int lastOtherPressed = lastKeysPressed & otherKeys;
+
+        if (currentMovementPressed > 0)
         {
-            ++keyPressDuration;
+            ++keysHeldDuration;
         }
         else
         {
-            keyPressDuration = 0;
-            currentPressDuration = 0;
+            keysHeldDuration = 0;
+            timeToRegisterIndex = 0;
         }
 
-        if (keyPressDuration == pressDurations[currentPressDuration] &&
-            (currentKeysPressed & moving) > 0)
+        // Split out storing information about moving (should charge) and rotating (should not charge).
+        if (keysHeldDuration == timesToRegister[timeToRegisterIndex])
         {
-            keyPressDuration = 1;
-            currentPressDuration = Math.Min(++currentPressDuration, pressDurations.Length - 1);
-            relayedKeysPressed = currentKeysPressed;
+            timeToRegisterIndex = Math.Min(++keysHeldDuration, timesToRegister.Length - 1);
+            keysHeldDuration = 1;
+            relayedKeysPressed += currentMovementPressed;
         }
-        else if (keyPressDuration == 1 && (currentKeysPressed & rotating) > 0)
+
+        if ((lastKeysPressed & rotation) == 0 && (currentKeysPressed & rotation) > 0)
         {
-            relayedKeysPressed = currentKeysPressed;
+            relayedKeysPressed += (currentKeysPressed & rotation);
         }
-        else
-        {
-            relayedKeysPressed = ~lastKeysPressed & currentKeysPressed;
-        }
+
+        relayedKeysPressed |= (~lastOtherPressed & currentOtherPressed);
     }
 }
