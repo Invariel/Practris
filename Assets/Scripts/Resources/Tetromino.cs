@@ -261,6 +261,9 @@ public class ActivePiece
     public Piece Piece { get; set; }
     public Point CurrentLocation { get; set; }
     public int RotationState { get; set; }
+    public int ShadowRotationDirection { get; set; } = 0;
+    public int ShadowRotationIndex { get; set; } = 0;
+    public int ShadowRotationState { get => (RotationState + ShadowRotationDirection + 4) % 4; }
 
     public Tetrominos.PieceDefinition PieceData => Tetrominos.PieceData[Piece];
     public int[,,] RotationData => Tetrominos.PieceData[Piece].RotationData;
@@ -270,5 +273,17 @@ public class ActivePiece
         Piece = piece;
         CurrentLocation = Tetrominos.GetPieceData(piece).StartingPoint;
         RotationState = 0;
+    }
+
+    public ActivePiece Copy()
+    {
+        return new ActivePiece(Piece)
+        {
+            Piece = this.Piece,
+            CurrentLocation = new Point(this.CurrentLocation.X, this.CurrentLocation.Y),
+            RotationState = this.RotationState,
+            ShadowRotationIndex = this.ShadowRotationIndex,
+            ShadowRotationDirection = this.ShadowRotationDirection
+        };
     }
 }

@@ -44,5 +44,6 @@
   "Menu": [
     27
   ],
-  "HardDrop": true
+  "HardDrop": true,
+  "Style": "v4"
 }

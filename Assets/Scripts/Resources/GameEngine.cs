@@ -11,14 +11,14 @@ using UnityEngine.SceneManagement;
 public class GameEngine : MonoBehaviour
 {
     // Reference to the class that maintains board state.
-    public GameBoard gameBoard = new GameBoard();
+    public GameBoard gameBoard;
 
     // previousGameState is for which state to return to after closing the menu.
     public GameState gameState = GameState.None;
     public GameState previousGameState = GameState.None;
 
     // Player stuff.
-    public Settings gameSettings;
+    public Settings gameSettings { get => userInput.gameSettings; }
     public UserInput userInput;
 
     // Next seven pieces, and next seven pieces after that.
@@ -26,7 +26,12 @@ public class GameEngine : MonoBehaviour
     public List<Piece> nextPieceBag;
 
     public ActivePiece currentPiece;
+    public ActivePiece shadowPiece;
     public Piece? heldPiece = null;
+
+    public int ShadowRotationDirection = 0;
+    public int ShadowRotationState = 0;
+    public bool ShadowRotationActive = false;
 
     public int lastKeyPressed;
 
@@ -45,7 +50,14 @@ public class GameEngine : MonoBehaviour
 
     // Game state stuff.
     [SerializeField]
-    private TMP_Text text;
+    private TMP_Text txt_Lines;
+
+    [SerializeField]
+    private TMP_Text lbl_RotationData;
+
+    [SerializeField]
+    private TMP_Text txt_RotationData;
+
 
     public int linesCleared = 0;
     public int[] completedRows;
@@ -53,16 +65,18 @@ public class GameEngine : MonoBehaviour
 
     private void Awake()
     {
-        StartNewGame();
-
         // Load the settings if they exist, if not this will create a fresh Settings file to modify later.
         userInput.LoadSettingsFromFile();
         userInput.SaveSettingsToFile();
+
+        StartNewGame();
     }
 
     public void StartNewGame ()
     {
-        gameBoard.Initialize();
+        gameBoard = new GameBoard(gameSettings.Style);
+
+        gameBoard.MakeBoard(null);
         gameBoard.DrawGameBoard();
 
         currentPieceBag = PieceBagManager.GeneratePieceBag();
@@ -73,6 +87,10 @@ public class GameEngine : MonoBehaviour
         UpdateLinesCleared();
 
         gameHistory = new();
+
+        lbl_RotationData.alpha = 0;
+        txt_RotationData.alpha = 0;
+        txt_RotationData.text = "";
 
         gameState = GameState.None;
     }
@@ -96,7 +114,7 @@ public class GameEngine : MonoBehaviour
 
     public void UpdateLinesCleared ()
     {
-        text.text = $"Lines {linesCleared}";
+        txt_Lines.text = $"Lines {linesCleared}";
     }
 
     public void Update()
@@ -106,6 +124,17 @@ public class GameEngine : MonoBehaviour
             // Then exit this scene and load the title screen.
             SceneManager.LoadScene("TitleScene");
             SceneManager.UnloadSceneAsync("Begin");
+        }
+
+        if (currentPiece is not null &&
+            ShadowRotationActive)
+        {
+            ClearRotationShadow();
+        }
+
+        if (shadowPiece is not null)
+        {
+            ClearPieceShadow(true);
         }
 
         switch (gameState)
@@ -126,6 +155,9 @@ public class GameEngine : MonoBehaviour
                 }
                 break;
             case GameState.PiecePlaced:
+                ClearRotationShadow();
+                ClearPieceShadow(true);
+
                 State_PiecePlaced();
                 break;
             case GameState.Searching:
@@ -142,8 +174,7 @@ public class GameEngine : MonoBehaviour
             case GameState.GameOver:
                 int keysPressed = userInput.GetKeysPressed;
 
-                if (UserInput.TestKey(KeyPressed.Rewind, keysPressed) ||
-                    UserInput.TestKey(KeyPressed.Forward, keysPressed))
+                if (TimeTravel(keysPressed))
                 {
                     gameState = GameState.Searching;
                     State_Searching();
@@ -155,7 +186,29 @@ public class GameEngine : MonoBehaviour
                 break;
         }
 
+        if (shadowPiece is not null)
+        {
+            gameBoard.DrawPieceShadow(shadowPiece, false);
+        }
+
+        shadowPiece = gameBoard.PlummetPiece(currentPiece);
+
         gameBoard.DrawGameBoard();
+
+        if (currentPiece is not null &&
+            shadowPiece is not null &&
+            !ShadowRotationActive &&
+            currentPiece.CurrentLocation != shadowPiece.CurrentLocation)
+        {
+            gameBoard.DrawPieceShadow(shadowPiece, true);
+        }
+
+        if (currentPiece is not null &&
+            ShadowRotationActive)
+        {
+            gameBoard.DrawRotationShadow(currentPiece, true);
+        }
+
         gameBoard.DrawNextPieces(currentPieceBag, nextPieceBag);
         gameBoard.DrawHeldPiece(heldPiece);
     }
@@ -168,19 +221,28 @@ public class GameEngine : MonoBehaviour
 
         EnqueueGameState(currentGameState, newPiece, heldPiece);
 
-        currentPiece = new ActivePiece(newPiece);
+        currentPiece = MakeActivePiece(newPiece);
         gameState = (gameBoard.PlacePiece(currentPiece, true) ? GameState.MovePiece : GameState.GameOver);
+    }
+
+    public ActivePiece MakeActivePiece(Piece newPiece)
+    {
+        ActivePiece activePiece = new ActivePiece(newPiece);
+        activePiece.ShadowRotationDirection = ShadowRotationDirection;
+        activePiece.ShadowRotationIndex = (newPiece == Piece.O ? 0 : ShadowRotationState);
+
+        return activePiece;
     }
 
     public void State_MovePiece()
     {
         int keysPressed = userInput.GetKeysPressed;
 
-        bool success = MovePiece(keysPressed);
-        success |= RotatePiece(keysPressed);
-        success = success ? success : HoldPiece(keysPressed);
-        success = success ? success : ShowRotations(keysPressed);
-        success = success ? success : TimeTravel(keysPressed);
+        MovePiece(keysPressed);
+        RotatePiece(keysPressed);
+        HoldPiece(keysPressed);
+        ShowRotations(keysPressed);
+        TimeTravel(keysPressed);
     }
 
     #region State_MovePiece methods.
@@ -196,7 +258,8 @@ public class GameEngine : MonoBehaviour
         {
             gameBoard.MovePiece(currentPiece, _moveRight);
         }
-        else if (UserInput.TestKey(KeyPressed.Up, keysPressed))
+
+        if (UserInput.TestKey(KeyPressed.Up, keysPressed))
         {
             gameBoard.MovePiece(currentPiece, _moveUp);
         }
@@ -254,7 +317,7 @@ public class GameEngine : MonoBehaviour
             {
                 heldPieceThisMove = true;
 
-                gameBoard.ClearHeldPiece();
+                gameBoard.CleanUpGameObjects(gameBoard._heldPiece);
 
                 Piece? tempPiece = null;
                 if (heldPiece.HasValue)
@@ -264,20 +327,20 @@ public class GameEngine : MonoBehaviour
 
                 heldPiece = currentPiece.Piece;
                 gameBoard.ErasePiece(currentPiece);
+                currentPiece = null;
 
+                if (shadowPiece is not null)
+                {
+                    ClearPieceShadow(true);
+                }
 
                 // If tempPiece is null, we did not have a held piece, so proceed as normal.
-                if (tempPiece is null)
+                if (tempPiece is not null)
                 {
-                    gameState = GameState.SpawnPiece;
+                    currentPieceBag.Insert(0, tempPiece.Value);
                 }
-                else
-                {
-                    MinoEnum[,] currentGameState = gameBoard.CopyBoardState();
-                    currentPiece = new ActivePiece(tempPiece.Value);
-                    EnqueueGameState(currentGameState, currentPiece.Piece, heldPiece);
-                    gameBoard.PlacePiece(currentPiece, true);
-                }
+
+                gameState = GameState.SpawnPiece;
             }
         }
         else
@@ -288,24 +351,102 @@ public class GameEngine : MonoBehaviour
         return swapped;
     }
 
-    private bool ShowRotations (int keysPressed)
+    private void ShowRotations (int keysPressed)
     {
-        bool rotations = true;
+        int numberOfWallKicks = currentPiece.PieceData.WallKickOffsets[new Tuple<int, int>(0, 1)].GetLength(0);
 
-        if (UserInput.TestKey(KeyPressed.RotationLeft, keysPressed))
+        if (UserInput.TestKey(KeyPressed.RotationLeft, keysPressed) &&
+            UserInput.TestKey(KeyPressed.RotationRight, keysPressed))
         {
-            // No-op for now.
+            ShadowRotationActive = false;
+
+            lbl_RotationData.alpha = 0;
+            txt_RotationData.alpha = 0;
+            txt_RotationData.text = "";
+        }
+        else if (UserInput.TestKey(KeyPressed.RotationLeft, keysPressed))
+        {
+            ShadowRotationActive = true;
+
+            lbl_RotationData.alpha = 1;
+            txt_RotationData.alpha = 1;
+
+            if (ShadowRotationDirection == -1)
+            {
+                ShadowRotationState = (ShadowRotationState + 1 + numberOfWallKicks) % numberOfWallKicks;
+            }
+            else
+            {
+                ShadowRotationDirection = -1;
+                ShadowRotationState = 0;
+            }
         }
         else if (UserInput.TestKey(KeyPressed.RotationRight, keysPressed))
         {
-            // No-op for now.
-        }
-        else
-        {
-            rotations = false;
+            ShadowRotationActive = true;
+
+            lbl_RotationData.alpha = 1;
+            txt_RotationData.alpha = 1;
+
+            if (ShadowRotationDirection == 1)
+            {
+                ShadowRotationState = (ShadowRotationState + 1 + numberOfWallKicks) % numberOfWallKicks;
+            }
+            else
+            {
+                ShadowRotationDirection = 1;
+                ShadowRotationState = 0;
+            }
         }
 
-        return rotations;
+        UpdateRotationText();
+        CopyRotationInformation();
+    }
+
+    private void UpdateRotationText()
+    {
+        int numberOfWallKicks = currentPiece.PieceData.WallKickOffsets[new Tuple<int, int>(0, 1)].GetLength(0);
+
+        int curState = currentPiece.RotationState;
+        int newState = (curState + ShadowRotationDirection + 4) % 4;
+
+        string direction = (ShadowRotationDirection == -1 ? "counter-clockwise" : (ShadowRotationDirection == 1 ? "clockwise" : "not rotating"));
+
+        txt_RotationData.text = $"Rotating from state {curState} to {newState} [{direction}], checking rotation {currentPiece.ShadowRotationIndex + 1} of {numberOfWallKicks}.";
+
+        var rotationIndex = new Tuple<int, int>(curState, newState);
+        if (currentPiece.PieceData.WallKickOffsets.ContainsKey(rotationIndex))
+        {
+            gameBoard.ErasePiece(currentPiece);
+
+            ActivePiece rotationPiece = currentPiece.Copy();
+            rotationPiece.RotationState = newState;
+
+            var wallKicks = currentPiece.PieceData.WallKickOffsets[rotationIndex];
+
+            Size offset = new Size(wallKicks[currentPiece.ShadowRotationIndex, 0], wallKicks[currentPiece.ShadowRotationIndex, 1]);
+            rotationPiece.CurrentLocation += offset;
+
+            bool canPlace = gameBoard.ValidatePiecePosition(rotationPiece);
+
+            txt_RotationData.text += $" This {(canPlace ? "is a valid rotation, so the piece will end up here unless an earlier rotation state is also valid" : " collides with something and is an invalid placement, so try the next rotation")}.";
+
+            gameBoard.PlacePiece(currentPiece, true);
+        }
+    }
+
+    private void CopyRotationInformation()
+    {
+        if (currentPiece is not null)
+        {
+            if (currentPiece.Piece == Piece.O)
+            {
+                ShadowRotationState = 0;
+            }
+
+            currentPiece.ShadowRotationDirection = ShadowRotationDirection;
+            currentPiece.ShadowRotationIndex = ShadowRotationState;
+        }
     }
 
     private bool TimeTravel (int keysPressed)
@@ -331,9 +472,35 @@ public class GameEngine : MonoBehaviour
     }
     #endregion
 
+    public void ClearRotationShadow()
+    {
+        if (ShadowRotationActive && currentPiece is not null)
+        {
+            gameBoard.DrawRotationShadow(currentPiece, false);
+        }
+    }
+
+public void ClearPieceShadow(bool removeShadowPiece)
+    {
+        if (shadowPiece is not null)
+        {
+            gameBoard.DrawPieceShadow(shadowPiece, false);
+
+            if (removeShadowPiece)
+            {
+                shadowPiece = null;
+            }
+        }
+    }
+
     public void State_PiecePlaced()
     {
         completedRows = gameBoard.CheckForClearedLines();
+
+        ClearPieceShadow(true);
+        ClearRotationShadow();
+
+        currentPiece = null;
 
         if (completedRows.Any())
         {
@@ -374,6 +541,8 @@ public class GameEngine : MonoBehaviour
                 gameHistory.RemoveRange(positionToDelete, amountToDelete);
             }
 
+            heldPieceThisMove = false;
+
             gameState = GameState.MovePiece;
             return;
         }
@@ -412,7 +581,7 @@ public class GameEngine : MonoBehaviour
             newPiece = ProcessDifferentBoard(currentBoardState, newBoardState, rewinding);
         }
 
-        currentPiece = new ActivePiece(newPiece);
+        currentPiece = MakeActivePiece(newPiece);
 
         gameBoard.SetGameBoard(newBoardState.Item1);
         gameBoard.PlacePiece(currentPiece, true);
@@ -453,17 +622,18 @@ public class GameEngine : MonoBehaviour
             {
                 currentPieceBag.Insert(0, currentBoardState.Item2);
                 newPiece = newBoardState.Item2;
+                heldPiece = null;
             }
             // Case 2: hold piece in the new state.  Swap the pieces.
             else
             {
                 newPiece = newBoardState.Item3.Value;
-                heldPiece = currentBoardState.Item2;
+                heldPiece = newBoardState.Item2;
             }
         }
         else
         {
-            if (newBoardState.Item3 is null)    // The board is the same, so we held a piece.  We don't have a held piece now, we do next move.
+            if (currentBoardState.Item3 is null)    // The board is the same, so we held a piece.  We don't have a held piece now, we do next move.
             {
                 newPiece = GetNextPiece();
                 heldPiece = currentBoardState.Item2;

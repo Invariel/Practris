@@ -11,14 +11,18 @@ using static System.Runtime.CompilerServices.RuntimeHelpers;
 public class UserInput : MonoBehaviour
 {
     public Settings gameSettings;
-    public static int[] timesToRegister = { 1, 30, 30, 30, 20, 20, 15, 10, 5, };
+    public static int[] timesToRegister_Movement = { 1, 30, 30, 25, 25, 20, 20, 15, 10, 5, 3, };
+    public static int[] timesToRegister_TimeTravel = { 1, 15, 15, 15, 10, 10, 5, 5, 3 };
 
     public int lastKeysPressed = (int)KeyPressed.None;
     public int currentKeysPressed = (int)KeyPressed.None;
     public int relayedKeysPressed = (int)KeyPressed.None;
 
-    public int keysHeldDuration = 0;
-    public int timeToRegisterIndex = 0;
+    public int keysHeldDuration_Movement = 0;
+    public int keysHeldDuration_TimeTravel = 0;
+
+    public int timeToRegisterIndex_Movement = 0;
+    public int timeToRegisterIndex_TimeTravel = 0;
 
     public string filename = "./settings.json";
 
@@ -32,13 +36,15 @@ public class UserInput : MonoBehaviour
         (int)KeyPressed.SpinLeft |
         (int)KeyPressed.SpinRight;
 
-    private const int otherKeys =
+    private const int timeTravel =
+        (int)KeyPressed.Rewind |
+        (int)KeyPressed.Forward;
+
+    private const int noRepeatKeys =
         (int)KeyPressed.Accept |
         (int)KeyPressed.HoldPiece |
         (int)KeyPressed.RotationLeft |
         (int)KeyPressed.RotationRight |
-        (int)KeyPressed.Rewind |
-        (int)KeyPressed.Forward |
         (int)KeyPressed.Menu;
 
     public void LoadSettingsFromFile ()
@@ -93,8 +99,8 @@ public class UserInput : MonoBehaviour
         int keysPressed = 0;
 
         // Movement.
-        CheckKeys(ref keysPressed, gameSettings.Up, KeyPressed.Up, null);
-        CheckKeys(ref keysPressed, gameSettings.Down, KeyPressed.Down, new List<KeyPressed>() { KeyPressed.Up });
+        CheckKeys(ref keysPressed, gameSettings.Down, KeyPressed.Down, null);
+        CheckKeys(ref keysPressed, gameSettings.Up, KeyPressed.Up, new List<KeyPressed>() { KeyPressed.Down });
         CheckKeys(ref keysPressed, gameSettings.Left, KeyPressed.Left, null);
         CheckKeys(ref keysPressed, gameSettings.Right, KeyPressed.Right, new List<KeyPressed>() { KeyPressed.Left });
         CheckKeys(ref keysPressed, gameSettings.Accept, KeyPressed.Accept, new List<KeyPressed>() { KeyPressed.Up, KeyPressed.Down, KeyPressed.Left, KeyPressed.Right });
@@ -102,8 +108,9 @@ public class UserInput : MonoBehaviour
         // Rotation.
         CheckKeys(ref keysPressed, gameSettings.SpinLeft, KeyPressed.SpinLeft, null);
         CheckKeys(ref keysPressed, gameSettings.SpinRight, KeyPressed.SpinRight, new List<KeyPressed>() { KeyPressed.SpinLeft });
+        
         CheckKeys(ref keysPressed, gameSettings.RotationLeft, KeyPressed.RotationLeft, new List<KeyPressed>() { KeyPressed.SpinLeft, KeyPressed.SpinRight });
-        CheckKeys(ref keysPressed, gameSettings.RotationRight, KeyPressed.RotationRight, new List<KeyPressed>() { KeyPressed.SpinLeft, KeyPressed.SpinRight, KeyPressed.RotationRight });
+        CheckKeys(ref keysPressed, gameSettings.RotationRight, KeyPressed.RotationRight, new List<KeyPressed>() { KeyPressed.SpinLeft, KeyPressed.SpinRight });
 
         // Hold Piece
         CheckKeys(ref keysPressed, gameSettings.HoldPiece, KeyPressed.HoldPiece, null);
@@ -123,25 +130,44 @@ public class UserInput : MonoBehaviour
         int currentRotationPressed = keysPressed & rotation;
         int lastRotationPressed = lastKeysPressed & rotation;
 
-        int currentOtherPressed = keysPressed & otherKeys;
-        int lastOtherPressed = lastKeysPressed & otherKeys;
+        int currentTimeTravelPressed = keysPressed & timeTravel;
+        int lastTimeTravelPressed = lastKeysPressed & timeTravel;
+
+        int currentNoRepeat = keysPressed & noRepeatKeys;
+        int lastNoRepeat = lastKeysPressed & noRepeatKeys;
 
         if (currentMovementPressed > 0)
         {
-            ++keysHeldDuration;
+            ++keysHeldDuration_Movement;
         }
         else
         {
-            keysHeldDuration = 0;
-            timeToRegisterIndex = 0;
+            keysHeldDuration_Movement = 0;
+            timeToRegisterIndex_Movement = 0;
+        }
+
+        if (currentMovementPressed == 0 && currentTimeTravelPressed > 0)
+        {
+            ++keysHeldDuration_TimeTravel;
+        }
+        else
+        {
+            keysHeldDuration_TimeTravel = 0;
+            timeToRegisterIndex_TimeTravel = 0;
         }
 
         // Split out storing information about moving (should charge) and rotating (should not charge).
-        if (keysHeldDuration == timesToRegister[timeToRegisterIndex])
+        if (keysHeldDuration_Movement == timesToRegister_Movement[timeToRegisterIndex_Movement])
         {
-            timeToRegisterIndex = Math.Min(++keysHeldDuration, timesToRegister.Length - 1);
-            keysHeldDuration = 1;
+            timeToRegisterIndex_Movement = Math.Min(++timeToRegisterIndex_Movement, timesToRegister_Movement.Length - 1);
+            keysHeldDuration_Movement = 1;
             relayedKeysPressed += currentMovementPressed;
+        }
+        else if (keysHeldDuration_TimeTravel == timesToRegister_TimeTravel[timeToRegisterIndex_TimeTravel])
+        {
+            timeToRegisterIndex_TimeTravel = Math.Min(++timeToRegisterIndex_TimeTravel, timesToRegister_TimeTravel.Length - 1);
+            keysHeldDuration_TimeTravel = 1;
+            relayedKeysPressed += currentTimeTravelPressed;
         }
 
         if ((lastKeysPressed & rotation) == 0 && (currentKeysPressed & rotation) > 0)
@@ -149,6 +175,6 @@ public class UserInput : MonoBehaviour
             relayedKeysPressed += (currentKeysPressed & rotation);
         }
 
-        relayedKeysPressed |= (~lastOtherPressed & currentOtherPressed);
+        relayedKeysPressed |= (~lastNoRepeat & currentNoRepeat);
     }
 }
