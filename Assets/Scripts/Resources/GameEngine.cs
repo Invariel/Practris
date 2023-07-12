@@ -65,6 +65,8 @@ public class GameEngine : MonoBehaviour
 
     private void Awake()
     {
+        Application.targetFrameRate = 60;
+
         // Load the settings if they exist, if not this will create a fresh Settings file to modify later.
         userInput.LoadSettingsFromFile();
         userInput.SaveSettingsToFile();
@@ -155,6 +157,8 @@ public class GameEngine : MonoBehaviour
                 }
                 break;
             case GameState.PiecePlaced:
+                userInput.lockingPieceFrames = 0;
+
                 ClearRotationShadow();
                 ClearPieceShadow(true);
 
@@ -239,8 +243,13 @@ public class GameEngine : MonoBehaviour
         int keysPressed = userInput.GetKeysPressed;
 
         MovePiece(keysPressed);
-        RotatePiece(keysPressed);
-        HoldPiece(keysPressed);
+
+        if (gameState == GameState.MovePiece)
+        {
+            RotatePiece(keysPressed);
+            HoldPiece(keysPressed);
+        }
+
         ShowRotations(keysPressed);
         TimeTravel(keysPressed);
     }
@@ -249,6 +258,7 @@ public class GameEngine : MonoBehaviour
     private bool MovePiece (int keysPressed)
     {
         bool moved = true;
+        bool tryLockPiece = false;
 
         if (UserInput.TestKey(KeyPressed.Left, keysPressed))
         {
@@ -267,7 +277,14 @@ public class GameEngine : MonoBehaviour
         {
             if (!gameBoard.MovePiece(currentPiece, _moveDown))
             {
-                gameState = GameState.PiecePlaced;
+                if (!UserInput.TestKey(KeyPressed.Down, userInput.lastKeysPressed))
+                {
+                    gameState = GameState.PiecePlaced;
+                }
+                else
+                {
+                    tryLockPiece = true;
+                }
             }
         }
         else if (UserInput.TestKey(KeyPressed.Accept, keysPressed))
@@ -284,9 +301,38 @@ public class GameEngine : MonoBehaviour
             moved = false;
         }
 
+        if (UserInput.TestKey(KeyPressed.Down, userInput.lastKeysPressed) &&
+            UserInput.TestKey(KeyPressed.Down, userInput.currentKeysPressed) &&
+            (tryLockPiece || userInput.lockingPieceFrames > 0))
+        {
+            userInput.lockingPieceFrames++;
+        }
+        else
+        {
+            userInput.lockingPieceFrames = 0;
+        }
+
+        // If "Accept" was pressed too, then the piece was already locked, and we don't bother with this.
+        if ((tryLockPiece && gameState != GameState.PiecePlaced) ||
+            userInput.lockingPieceFrames > 0)
+        {
+            LockIffPieceShouldLock();
+        }
+
         return moved;
     }
-    
+
+    // If we're in this method, the piece is trying to move down, but can't.
+    // Therefore, either lock it after enough frames have passed, or ... don't.
+    private void LockIffPieceShouldLock()
+    {
+        if (userInput.lockingPieceFrames >= UserInput.framesBeforeLockingPiece)
+        {
+            gameState = GameState.PiecePlaced;
+            userInput.lockingPieceFrames = 0;
+        }
+    }
+
     private bool RotatePiece (int keysPressed)
     {
         bool rotated = true;

@@ -24,6 +24,9 @@ public class UserInput : MonoBehaviour
     public int timeToRegisterIndex_Movement = 0;
     public int timeToRegisterIndex_TimeTravel = 0;
 
+    public const int framesBeforeLockingPiece = 45;
+    public int lockingPieceFrames = 0;
+
     public string filename = "./settings.json";
 
     private const int moving =
@@ -176,5 +179,10 @@ public class UserInput : MonoBehaviour
         }
 
         relayedKeysPressed |= (~lastNoRepeat & currentNoRepeat);
+    }
+
+    public bool PieceShouldLock ()
+    {
+        return lockingPieceFrames >= framesBeforeLockingPiece;
     }
 }
