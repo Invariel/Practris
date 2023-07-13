@@ -120,7 +120,7 @@ public class GameBoard
             {
                 if (_gameSurface[x, y] is null)
                 {
-                    _gameSurface[x, y] = Mino.CreateMino(_boardState[x, y], _style, $"({x,2}, {y,2})", true);
+                    _gameSurface[x, y] = Mino.CreateMino(_boardState[x, y], _style, x, y, true);
                 }
 
                 if (spacing == -1f)
@@ -174,6 +174,39 @@ public class GameBoard
         }
     }
 
+    public string[] SerializeGameBoard()
+    {
+        List<string> lines = new List<string>();
+
+        for (int x = 0; x < _boardState.GetLength(0); ++ x)
+        {
+            string line = "";
+
+            for (int y = 0; y < _boardState.GetLength(1); ++ y)
+            {
+                line = $"{line}{(int)_boardState[x, y]}";
+            }
+
+            lines.Add(line);
+        }
+
+        return lines.ToArray<string>();
+    }
+
+    public MinoEnum[,] DeserializeGameBoard(string[] lines)
+    {
+        MinoEnum[,] boardState = new MinoEnum[playfieldWidth, playfieldHeight];
+        for (int col = 0; col < lines.Length; ++ col)
+        {
+            for (int row = 0; row < playfieldHeight; ++row)
+            {
+
+            }
+        }
+
+        return boardState;
+    }
+
     #region Held Piece, CurrentPieceBag and NextPieceBag display and cleanup.
     public void CleanUpGameObjects (List<GameObject> gameObjects)
     {
@@ -203,7 +236,7 @@ public class GameBoard
                 {
                     if (rotationData[0, row, column] == 1)
                     {
-                        GameObject tile = Mino.CreateMino(pieceData.ThisMino, _style, $"Held {pieceData.Name}", false);
+                        GameObject tile = Mino.CreateMino(pieceData.ThisMino, _style, -1, -1, false);
 
                         Vector3 vector = tile.transform.position;
                         vector.x = spacing / 2 * (leftTile + column);
@@ -242,7 +275,7 @@ public class GameBoard
                     {
                         if (rotationData[0, row, column] == 1)
                         {
-                            GameObject tile = Mino.CreateMino(pieceData.ThisMino, _style, $"Next {pieceData.Name}", false);
+                            GameObject tile = Mino.CreateMino(pieceData.ThisMino, _style, -1, -1, false);
 
                             SpriteRenderer sr = tile.GetComponent<SpriteRenderer>();
                             sr.color = new UnityEngine.Color(1f, 1f, 1f, (rightSide == 0 ? 1f : 0.2f));

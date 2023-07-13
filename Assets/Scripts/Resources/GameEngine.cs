@@ -475,7 +475,7 @@ public class GameEngine : MonoBehaviour
 
             bool canPlace = gameBoard.ValidatePiecePosition(rotationPiece);
 
-            txt_RotationData.text += $" This {(canPlace ? "is a valid rotation, so the piece will end up here unless an earlier rotation state is also valid" : " collides with something and is an invalid placement, so try the next rotation")}.";
+            txt_RotationData.text += $" This {(canPlace ? "is a valid rotation, so the piece will end up here unless an earlier rotation state is also valid" : "collides with something and is an invalid placement, so try the next rotation")}.";
 
             gameBoard.PlacePiece(currentPiece, true);
         }

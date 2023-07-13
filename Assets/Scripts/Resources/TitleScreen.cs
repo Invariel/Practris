@@ -12,8 +12,8 @@ public class TitleScreen : MonoBehaviour
     void Start() { }
     void Update() { }
 
-    public void Begin() { SceneManager.LoadScene(BeginScene); }
-    public void Edit() { /* SceneManager.LoadScene(EditBoardScene); */ }
-    public void Settings () { SceneManager.LoadScene(SettingsScene); }
-    public void Quit() { Application.Quit(); }
+    public void Begin() => SceneManager.LoadScene(BeginScene);
+    public void Edit() => SceneManager.LoadScene(EditBoardScene);
+    public void Settings () => SceneManager.LoadScene(SettingsScene);
+    public void Quit() => Application.Quit();
 }
