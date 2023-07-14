@@ -67,6 +67,7 @@
     <Compile Include="Assets\Scripts\Resources\Tetromino.cs" />
     <Compile Include="Assets\Scripts\Resources\KeyPressed.cs" />
     <Compile Include="Assets\Scripts\Resources\EditBoardScene.cs" />
+    <Compile Include="Assets\Scripts\Resources\StaticData.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

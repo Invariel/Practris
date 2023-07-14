@@ -77,9 +77,11 @@ public class GameEngine : MonoBehaviour
     public void StartNewGame ()
     {
         gameBoard = new GameBoard(gameSettings.Style);
-
-        gameBoard.MakeBoard(null);
+        
+        gameBoard.MakeBoard(StaticData.editedGameBoard);
         gameBoard.DrawGameBoard();
+
+        StaticData.editedGameBoard = null;
 
         currentPieceBag = PieceBagManager.GeneratePieceBag();
         nextPieceBag = PieceBagManager.GeneratePieceBag();

@@ -38,6 +38,22 @@ public class EditBoardScene : MonoBehaviour
         SetUpEventHandlers();
     }
 
+    public void ClearBoard()
+    {
+        MinoEnum[,] board = gameBoard._boardState;
+
+        for (int x = 0; x < board.GetLength(0); ++ x)
+        {
+            for (int y = 0; y < board.GetLength(1); ++ y)
+            {
+                if (gameBoard._boardState[x, y] != MinoEnum.Border)
+                {
+                    gameBoard._boardState[x, y] = MinoEnum.Empty;
+                }
+            }
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -164,11 +180,19 @@ public class EditBoardScene : MonoBehaviour
 
     public void LoadBoardState()
     {
-        string openFileName = EditorUtility.OpenFilePanel("Load Board State", ".", ".board");
+        string openFileName = EditorUtility.OpenFilePanel("Load Board State", ".", "board");
         if (openFileName is not null && File.Exists(openFileName))
         {
-            MinoEnum[,] boardState = JsonSerializer.Deserialize<MinoEnum[,]>(openFileName);
+            string[] lines = JsonSerializer.Deserialize<string[]>(File.ReadAllText(openFileName));
+            MinoEnum[,] boardState = gameBoard.DeserializeGameBoard(lines);
             gameBoard.SetGameBoard(boardState);
         }
+    }
+
+    public void StartGame()
+    {
+        StaticData.editedGameBoard = gameBoard.CopyBoardState();
+        SceneManager.LoadScene("Begin");
+        SceneManager.UnloadSceneAsync("EditBoard");
     }
 }

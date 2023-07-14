@@ -209,7 +209,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 583724858}
         m_TargetAssemblyTypeName: EditBoardScene, Assembly-CSharp
-        m_MethodName: StartNewGame
+        m_MethodName: ClearBoard
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

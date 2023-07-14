@@ -193,15 +193,35 @@ public class GameBoard
         return lines.ToArray<string>();
     }
 
-    public MinoEnum[,] DeserializeGameBoard(string[] lines)
+    public MinoEnum[,] DeserializeGameBoard(IEnumerable<string> lines)
     {
-        MinoEnum[,] boardState = new MinoEnum[playfieldWidth, playfieldHeight];
-        for (int col = 0; col < lines.Length; ++ col)
-        {
-            for (int row = 0; row < playfieldHeight; ++row)
-            {
+        MinoEnum[,] boardState = new MinoEnum[playfieldWidth + 2, playfieldHeight + 1];
+        int col = 0;
 
+        foreach (string line in lines)
+        {
+            for (int row = 0; row < playfieldHeight; ++ row)
+            {
+                try
+                {
+                    if (col < boardState.GetLength(0) && row < boardState.GetLength(1))
+                    {
+                        boardState[col, row] =
+                            line.Substring(row, 1) switch
+                            {
+                                "0" => MinoEnum.Empty,
+                                "1" => MinoEnum.Border,
+                                "2" => MinoEnum.Preset,
+                                _ => MinoEnum.Empty
+                            };
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.Log(e);
+                }
             }
+            ++col;
         }
 
         return boardState;
