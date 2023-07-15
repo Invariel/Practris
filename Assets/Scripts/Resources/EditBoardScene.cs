@@ -1,8 +1,10 @@
+using SFB;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using Unity.VisualScripting;
 using UnityEditor;
@@ -169,7 +171,7 @@ public class EditBoardScene : MonoBehaviour
 
     public void SaveBoardState()
     {
-        string saveFileName = EditorUtility.SaveFilePanel("Save Board State", ".", "board", "board");
+        string saveFileName = StandaloneFileBrowser.SaveFilePanel("Save Board State", ".", "board", "board");
 
         if (saveFileName is not null)
         {
@@ -180,10 +182,11 @@ public class EditBoardScene : MonoBehaviour
 
     public void LoadBoardState()
     {
-        string openFileName = EditorUtility.OpenFilePanel("Load Board State", ".", "board");
-        if (openFileName is not null && File.Exists(openFileName))
+        string[] openFileName = StandaloneFileBrowser.OpenFilePanel("Load Board State", ".", "board", false);
+
+        if (openFileName.Any() && File.Exists(openFileName[0]))
         {
-            string[] lines = JsonSerializer.Deserialize<string[]>(File.ReadAllText(openFileName));
+            string[] lines = JsonSerializer.Deserialize<string[]>(File.ReadAllText(openFileName[0]));
             MinoEnum[,] boardState = gameBoard.DeserializeGameBoard(lines);
             gameBoard.SetGameBoard(boardState);
         }

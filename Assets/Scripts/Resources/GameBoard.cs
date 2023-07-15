@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -21,6 +22,8 @@ public class GameBoard
     private float spacing = -1f;
 
     public string _style = "v2";
+
+    public string _tempDirectory = @"D:/Projects/Code/Practris v2/Assets/Sprites/Resources/v3";
 
     /// <summary>
     /// (0, 0) is the bottom left border piece.
@@ -168,9 +171,24 @@ public class GameBoard
         {
             for (int y = 0; y < _gameSurface.GetLength(1); ++ y)
             {
-                string spriteFilename = Mino.GetSpriteFilename(_boardState[x, y], _style);
-                _gameSurface[x, y].GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>(spriteFilename);
+                SetMinoTexture(x, y, _boardState[x, y], _style, _tempDirectory);
             }
+        }
+    }
+
+    public void SetMinoTexture (int x, int y, MinoEnum minoEnum, string style, string textureDirectory)
+    {
+        string spriteFilename = Mino.GetSpriteFilename(_boardState[x, y], _style);
+        var sr = _gameSurface[x, y].GetComponent<SpriteRenderer>();
+        _gameSurface[x, y].GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>(spriteFilename);
+
+        string filename = $"{textureDirectory}//Mino_Empty.png";
+        if (File.Exists(filename))
+        {
+            // Really, I should cache the fuck out of this...  But it has to work first.
+            var texture = new Texture2D(1, 1);
+            texture.LoadImage(File.ReadAllBytes(filename));
+            _gameSurface[x, y].GetComponent<Renderer>().material.mainTexture = texture;
         }
     }
 
