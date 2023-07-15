@@ -60,20 +60,21 @@
     <Compile Include="Assets\StandaloneFileBrowser\StandaloneFileBrowserWindows.cs" />
     <Compile Include="Assets\StandaloneFileBrowser\IStandaloneFileBrowser.cs" />
     <Compile Include="Assets\Scripts\Resources\Settings.cs" />
-    <Compile Include="Assets\Scripts\Resources\GameEngine.cs" />
+    <Compile Include="Assets\Scripts\Resources\Scenes\PlayfieldScene.cs" />
     <Compile Include="Assets\StandaloneFileBrowser\StandaloneFileBrowserEditor.cs" />
     <Compile Include="Assets\Scripts\Resources\GameBoard.cs" />
     <Compile Include="Assets\StandaloneFileBrowser\StandaloneFileBrowser.cs" />
     <Compile Include="Assets\Scripts\Resources\UserInput.cs" />
     <Compile Include="Assets\Scripts\Resources\StaticData.cs" />
     <Compile Include="Assets\StandaloneFileBrowser\StandaloneFileBrowserLinux.cs" />
-    <Compile Include="Assets\Scripts\Resources\TitleScreen.cs" />
-    <Compile Include="Assets\Scripts\Resources\SettingsScene.cs" />
+    <Compile Include="Assets\Scripts\Resources\Scenes\TitleScene.cs" />
+    <Compile Include="Assets\Scripts\Resources\Scenes\SettingsScene.cs" />
     <Compile Include="Assets\Scripts\Resources\Mino.cs" />
     <Compile Include="Assets\Scripts\Resources\Tetromino.cs" />
     <Compile Include="Assets\StandaloneFileBrowser\StandaloneFileBrowserMac.cs" />
-    <Compile Include="Assets\Scripts\Resources\EditBoardScene.cs" />
+    <Compile Include="Assets\Scripts\Resources\Scenes\EditBoardScene.cs" />
     <Compile Include="Assets\Scripts\Resources\KeyPressed.cs" />
+    <Compile Include="Assets\Scripts\Resources\Constants.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

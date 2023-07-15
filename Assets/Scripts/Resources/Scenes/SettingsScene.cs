@@ -1,10 +1,9 @@
 using SFB;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class SettingsScene : MonoBehaviour
 {
@@ -63,7 +62,11 @@ public class SettingsScene : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        int pressedKeys = _userInput.currentKeysPressed;
+        if (UserInput.TestKey(KeyPressed.Menu, pressedKeys))
+        {
+            SceneManager.LoadSceneAsync(Constants.GetScene(Constants.Scene.TITLE));
+        }
     }
 
     public void ReceiveInput()

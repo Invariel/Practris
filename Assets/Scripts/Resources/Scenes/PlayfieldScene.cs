@@ -2,13 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class GameEngine : MonoBehaviour
+public class PlayfieldScene : MonoBehaviour
 {
     // Reference to the class that maintains board state.
     public GameBoard gameBoard;
@@ -125,9 +123,7 @@ public class GameEngine : MonoBehaviour
     {
         if (UserInput.TestKey(KeyPressed.Menu, userInput.GetKeysPressed))
         {
-            // Then exit this scene and load the title screen.
-            SceneManager.LoadScene("TitleScene");
-            SceneManager.UnloadSceneAsync("Begin");
+            SceneManager.LoadSceneAsync(Constants.GetScene(Constants.Scene.TITLE));
         }
 
         if (currentPiece is not null &&

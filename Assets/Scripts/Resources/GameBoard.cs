@@ -2,16 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
-
-namespace System.Runtime.CompilerServices
-{
-    class IsExternalInit { }
-}
 
 public class GameBoard
 {
@@ -35,6 +27,8 @@ public class GameBoard
 
     public List<GameObject> _nextPieces = new List<GameObject>();
     public List<GameObject> _heldPiece = new List<GameObject>();
+
+    private Dictionary<string, Dictionary<string, Texture2D>> _cachedTextures = new();
 
     private const int _rotation = 0;
     private const int _rotRow = 1;
@@ -178,18 +172,16 @@ public class GameBoard
 
     public void SetMinoTexture (int x, int y, MinoEnum minoEnum, string style, string textureDirectory)
     {
-        string spriteFilename = Mino.GetSpriteFilename(_boardState[x, y], _style);
-        var sr = _gameSurface[x, y].GetComponent<SpriteRenderer>();
-        _gameSurface[x, y].GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>(spriteFilename);
+        _gameSurface[x, y].GetComponent<SpriteRenderer>().sprite = Mino.GetSprite(_boardState[x, y], _style);
 
-        string filename = $"{textureDirectory}//Mino_Empty.png";
-        if (File.Exists(filename))
-        {
-            // Really, I should cache the fuck out of this...  But it has to work first.
-            var texture = new Texture2D(1, 1);
-            texture.LoadImage(File.ReadAllBytes(filename));
-            _gameSurface[x, y].GetComponent<Renderer>().material.mainTexture = texture;
-        }
+        //string filename = $"{textureDirectory}//Mino_Empty.png";
+        //if (File.Exists(filename))
+        //{
+        //    // Really, I should cache the fuck out of this...  But it has to work first.
+        //    var texture = new Texture2D(1, 1);
+        //    texture.LoadImage(File.ReadAllBytes(filename));
+        //    _gameSurface[x, y].GetComponent<Renderer>().material.mainTexture = texture;
+        //}
     }
 
     public string[] SerializeGameBoard()
@@ -403,9 +395,7 @@ public class GameBoard
                     if (locX < _gameSurface.GetLength(_boardCol) && locY < _gameSurface.GetLength(_boardRow))
                     {
                         var sr = _gameSurface[locX, locY].GetComponent<SpriteRenderer>();
-
-                        string filename = Mino.GetSpriteFilename(currentPiece.PieceData.ThisMino, _style);
-                        sr.sprite = Resources.Load<Sprite>(filename);
+                        sr.sprite = Mino.GetSprite(currentPiece.PieceData.ThisMino, _style);
                     }
                 }
             }
@@ -435,10 +425,7 @@ public class GameBoard
                 if (locX < _gameSurface.GetLength(_boardCol) && locY < _gameSurface.GetLength(_boardRow) && _boardState[locX, locY] == MinoEnum.Empty)
                 {
                     var sr = _gameSurface[locX, locY].GetComponent<SpriteRenderer>();
-                    string filename = draw ?
-                        Mino.GetShadowSpriteFilename(shadow.PieceData.ThisMino, _style) :
-                        Mino.GetSpriteFilename(MinoEnum.Empty, _style);
-                    sr.sprite = Resources.Load<Sprite>(filename);
+                    sr.sprite = (draw ? Mino.GetShadowSprite(shadow.PieceData.ThisMino, _style) : Mino.GetSprite(MinoEnum.Empty, _style));
                 }
             }
         }
@@ -480,10 +467,7 @@ public class GameBoard
                     _boardState[locX, locY] == MinoEnum.Empty)
                 {
                     var sr = _gameSurface[locX, locY].GetComponent<SpriteRenderer>();
-                    string filename = draw ?
-                        Mino.GetShadowSpriteFilename(piece.PieceData.ThisMino, _style) :
-                        Mino.GetSpriteFilename(MinoEnum.Empty, _style);
-                    sr.sprite = Resources.Load<Sprite>(filename);
+                    sr.sprite = (draw ? Mino.GetShadowSprite(piece.PieceData.ThisMino, _style) : Mino.GetSprite(MinoEnum.Empty, _style));
                 }
             }
         }
@@ -492,8 +476,7 @@ public class GameBoard
     public void EraseMino(int row, int column)
     {
         _boardState[column, row] = MinoEnum.Empty;
-        string filename = Mino.GetSpriteFilename(MinoEnum.Empty, _style);
-        _gameSurface[column, row].GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>(filename);
+        _gameSurface[column, row].GetComponent<SpriteRenderer>().sprite = Mino.GetSprite(MinoEnum.Empty, _style);
     }
 
     public void ErasePiece(ActivePiece currentPiece)
@@ -520,8 +503,7 @@ public class GameBoard
                 if (locX < _gameSurface.GetLength(0) && locY < _gameSurface.GetLength(1))
                 {
                     SpriteRenderer sr = _gameSurface[locX, locY].GetComponent<SpriteRenderer>();
-                    string filename = Mino.GetSpriteFilename(MinoEnum.Empty, _style);
-                    sr.sprite = Resources.Load<Sprite>(filename);
+                    sr.sprite = Mino.GetSprite(MinoEnum.Empty, _style);
                 }
             }
         }
@@ -644,8 +626,7 @@ public class GameBoard
 
                     if (r < _gameSurface.GetLength(_boardRow))
                     {
-                        string filename = Mino.GetSpriteFilename(_boardState[col, r + 1], _style);
-                        _gameSurface[col, r].GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>(filename);
+                        _gameSurface[col, r].GetComponent<SpriteRenderer>().sprite = Mino.GetSprite(_boardState[col, r + 1], _style);
                     }
                 }
 

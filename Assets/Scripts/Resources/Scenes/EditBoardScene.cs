@@ -1,13 +1,8 @@
 using SFB;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -74,9 +69,7 @@ public class EditBoardScene : MonoBehaviour
         int keysPressed = userInput.GetKeysPressed;
         if (UserInput.TestKey(KeyPressed.Menu, userInput.GetKeysPressed))
         {
-            // Then exit this scene and load the title screen.
-            SceneManager.LoadScene("TitleScene");
-            SceneManager.UnloadSceneAsync("EditBoard");
+            SceneManager.LoadSceneAsync(Constants.GetScene(Constants.Scene.TITLE));
         }
     }
 
@@ -122,24 +115,9 @@ public class EditBoardScene : MonoBehaviour
 
         MinoEnum minoEnum = gameBoard._boardState[x, y];
 
-        if (minoEnum == MinoEnum.Empty)
-        {
-            gameBoard._boardState[x, y] = MinoEnum.Preset;
-            SpriteRenderer sr = gameBoard._gameSurface[x, y].GetComponent<SpriteRenderer>();
-            string filename = Mino.GetSpriteFilename(MinoEnum.Preset, gameSettings.Style);
-
-            minoClickedOriginalState = MinoEnum.Empty;
-            minoLastHovered = new Point(x, y);
-        }
-        else
-        {
-            gameBoard._boardState[x, y] = MinoEnum.Empty;
-            SpriteRenderer sr = gameBoard._gameSurface[x, y].GetComponent<SpriteRenderer>();
-            string filename = Mino.GetSpriteFilename(MinoEnum.Empty, gameSettings.Style);
-
-            minoClickedOriginalState = MinoEnum.Preset;
-            minoLastHovered = new Point(x, y);
-        }
+        gameBoard._boardState[x, y] = (minoEnum == MinoEnum.Empty ? MinoEnum.Preset : MinoEnum.Empty);
+        minoClickedOriginalState = minoEnum;
+        minoLastHovered = new Point(x, y);
     }
 
     private void RespondToHovering(object? sender, MinoEventArgs? eventArgs)
@@ -157,13 +135,12 @@ public class EditBoardScene : MonoBehaviour
 
         MinoEnum minoEnum = gameBoard._boardState[x, y];
 
-        if (minoEnum == minoClickedOriginalState.Value)
+        if (minoEnum == minoClickedOriginalState!.Value)
         {
             if (minoLastHovered.Value.X != x || minoLastHovered.Value.Y != y)
             {
                 gameBoard._boardState[x, y] = (minoEnum == MinoEnum.Empty ? MinoEnum.Preset : MinoEnum.Empty);
                 minoLastHovered = new Point(x, y);
-                Debug.Log($"Hovered over {x}, {y}, {minoEnum} state.");
             }
         }
     }
@@ -195,7 +172,6 @@ public class EditBoardScene : MonoBehaviour
     public void StartGame()
     {
         StaticData.editedGameBoard = gameBoard.CopyBoardState();
-        SceneManager.LoadScene("Begin");
-        SceneManager.UnloadSceneAsync("EditBoard");
+        SceneManager.LoadSceneAsync(Constants.GetScene(Constants.Scene.PLAYFIELD));
     }
 }

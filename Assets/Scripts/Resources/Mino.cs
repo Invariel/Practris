@@ -1,11 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
-using System.IO;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Animations;
 
 public class Mino
 {
@@ -17,19 +12,63 @@ public class Mino
     private static float _sideBlockSize = 0.3125f;
     private static Vector3 _sideBlockScale = new Vector3(_sideBlockSize, _sideBlockSize, _sideBlockSize);
 
+    private static string[] _resourceStyles = new[] { "Original", "v2", "v3", "v4", "v5" };
+
     private static Dictionary<MinoEnum, MinoData> _minoData = new Dictionary<MinoEnum, MinoData>()
     {
-        { MinoEnum.Empty, new MinoData() { MinoName = "Empty", MinoSprite = "Mino_Empty", MinoShadowSprite = "Mino_Empty" } },
-        { MinoEnum.Border, new MinoData() { MinoName = "Border", MinoSprite = "Mino_Border", MinoShadowSprite = "Mino_Border" } },
-        { MinoEnum.Preset, new MinoData() { MinoName = "Preset", MinoSprite = "Mino_Preset", MinoShadowSprite = "Mino_Preset" } },
-        { MinoEnum.I, new MinoData() { MinoName = "I", MinoSprite = "Mino_I_Cyan", MinoShadowSprite = "Mino_I_Cyan_Shadow" } },
-        { MinoEnum.J, new MinoData() { MinoName = "J", MinoSprite = "Mino_J_Blue", MinoShadowSprite = "Mino_J_Blue_Shadow" } },
-        { MinoEnum.L, new MinoData() { MinoName = "L", MinoSprite = "Mino_L_Orange", MinoShadowSprite = "Mino_L_Orange_Shadow" } },
-        { MinoEnum.O, new MinoData() { MinoName = "O", MinoSprite = "Mino_O_Yellow", MinoShadowSprite = "Mino_O_Yellow_Shadow" } },
-        { MinoEnum.S, new MinoData() { MinoName = "S", MinoSprite = "Mino_S_Green", MinoShadowSprite = "Mino_S_Green_Shadow" } },
-        { MinoEnum.T, new MinoData() { MinoName = "T", MinoSprite = "Mino_T_Purple", MinoShadowSprite = "Mino_T_Purple_Shadow" } },
-        { MinoEnum.Z, new MinoData() { MinoName = "Z", MinoSprite = "Mino_Z_Red", MinoShadowSprite = "Mino_Z_Red_Shadow" } },
+        { MinoEnum.Empty, new MinoData() { MinoName = "Empty", MinoSpriteName = "Mino_Empty", MinoShadowName = "Mino_Empty" } },
+        { MinoEnum.Border, new MinoData() { MinoName = "Border", MinoSpriteName = "Mino_Border", MinoShadowName = "Mino_Border" } },
+        { MinoEnum.Preset, new MinoData() { MinoName = "Preset", MinoSpriteName = "Mino_Preset", MinoShadowName = "Mino_Preset" } },
+        { MinoEnum.I, new MinoData() { MinoName = "I", MinoSpriteName = "Mino_I_Cyan", MinoShadowName = "Mino_I_Cyan_Shadow" } },
+        { MinoEnum.J, new MinoData() { MinoName = "J", MinoSpriteName = "Mino_J_Blue", MinoShadowName = "Mino_J_Blue_Shadow" } },
+        { MinoEnum.L, new MinoData() { MinoName = "L", MinoSpriteName = "Mino_L_Orange", MinoShadowName = "Mino_L_Orange_Shadow" } },
+        { MinoEnum.O, new MinoData() { MinoName = "O", MinoSpriteName = "Mino_O_Yellow", MinoShadowName = "Mino_O_Yellow_Shadow" } },
+        { MinoEnum.S, new MinoData() { MinoName = "S", MinoSpriteName = "Mino_S_Green", MinoShadowName = "Mino_S_Green_Shadow" } },
+        { MinoEnum.T, new MinoData() { MinoName = "T", MinoSpriteName = "Mino_T_Purple", MinoShadowName = "Mino_T_Purple_Shadow" } },
+        { MinoEnum.Z, new MinoData() { MinoName = "Z", MinoSpriteName = "Mino_Z_Red", MinoShadowName = "Mino_Z_Red_Shadow" } },
     };
+
+    private static Dictionary<string, Dictionary<MinoEnum, MinoSpriteData>> _minoSpriteData = new();
+
+    public static void CacheResourceMinos()
+    {
+        foreach (string style in _resourceStyles)
+        {
+            CacheResourceStyle(style);
+        }
+    }
+
+    private static void CacheResourceStyle(string style)
+    {
+        if (_minoSpriteData.ContainsKey(style))
+        {
+            return;
+        }
+
+        _minoSpriteData.Add(style, new());
+
+        foreach (KeyValuePair<MinoEnum, MinoData> data in _minoData)
+        {
+            Sprite mainSprite = Resources.Load<Sprite>($"{style}/{data.Value.MinoSpriteName}");
+            Sprite shadowSprite = Resources.Load<Sprite>($"{style}/{data.Value.MinoShadowName}");
+
+            Sprite backupSprite;
+            Sprite backupShadowSprite;
+
+            if (_minoSpriteData.ContainsKey("Original") && _minoSpriteData["Original"].ContainsKey(data.Key))
+            {
+                backupSprite = _minoSpriteData["Original"][data.Key].MinoSprite;
+                backupShadowSprite = _minoSpriteData["Original"][data.Key].MinoShadowSprite;
+            }
+            else
+            {
+                backupSprite = Resources.Load<Sprite>($"{style}/{data.Value.MinoSpriteName}");
+                backupShadowSprite = Resources.Load<Sprite>($"{style}/{data.Value.MinoShadowName}");
+            }
+
+            _minoSpriteData[style].Add(data.Key, new MinoSpriteData() { MinoSprite = mainSprite ?? backupSprite, MinoShadowSprite = shadowSprite ?? backupShadowSprite });
+        }
+    }
 
     public static MinoData GetMinoData(MinoEnum mino) => _minoData[mino];
 
@@ -38,9 +77,7 @@ public class Mino
         GameObject tile = new GameObject();
 
         SpriteRenderer sr = tile.AddComponent<SpriteRenderer>();
-
-        string filename = GetSpriteFilename(mino, style);
-        sr.sprite = Resources.Load<Sprite>(filename);
+        sr.sprite = GetSprite(mino, style);
 
         tile.transform.localScale = isMainBoard ? _blockScale : _sideBlockScale;
         tile.AddComponent<BoxCollider2D>();
@@ -51,26 +88,24 @@ public class Mino
         return tile;
     }
 
-    public static string GetSpriteFilename (MinoEnum mino, string style)
+    public static Sprite GetSprite (MinoEnum mino, string style)
     {
-        string basePath = $"{Application.dataPath}/Sprites/Resources";
+        if (!_minoSpriteData.ContainsKey(style))
+        {
+            style = "Original";
+        }
 
-        string path = $"{style}/{_minoData[mino].MinoSprite}";
-        string backupPath = $"Original/{_minoData[mino].MinoSprite}";
-
-        string outputFilename = File.Exists($"{basePath}/{path}.png") ? path : backupPath;
-        return outputFilename;
+        return _minoSpriteData[style][mino].MinoSprite;
     }
 
-    public static string GetShadowSpriteFilename (MinoEnum mino, string style)
+    public static Sprite GetShadowSprite(MinoEnum mino, string style)
     {
-        string basePath = $"{Application.dataPath}/Sprites/Resources";
+        if (!_minoSpriteData.ContainsKey(style))
+        {
+            style = "Original";
+        }
 
-        string path = $"{style}/{_minoData[mino].MinoShadowSprite}";
-        string backupPath = $"Original/{_minoData[mino].MinoShadowSprite}";
-
-        string outputFilename = File.Exists($"{basePath}/{path}.png") ? path : backupPath;
-        return outputFilename;
+        return _minoSpriteData[style][mino].MinoShadowSprite;
     }
 
     public class MinoClicked : MonoBehaviour
@@ -104,8 +139,14 @@ public class MinoEventArgs : EventArgs
 public class MinoData
 {
     public string MinoName { get; set; }
-    public string MinoSprite { get; set; }
-    public string MinoShadowSprite { get; set; }
+    public string MinoSpriteName { get; set; }
+    public string MinoShadowName { get; set; }
+}
+
+public class MinoSpriteData
+{
+    public Sprite MinoSprite { get; set; }
+    public Sprite MinoShadowSprite { get; set; }
 }
 
 public enum MinoEnum
