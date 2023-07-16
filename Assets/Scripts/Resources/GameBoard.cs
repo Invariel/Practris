@@ -53,6 +53,11 @@ public class GameBoard
         _style = style;
     }
 
+    public void SetStyle (string style)
+    {
+        _style = style;
+    }
+
     public MinoEnum[,] CopyBoardState() => (MinoEnum[,])_boardState.Clone();
 
 #nullable enable

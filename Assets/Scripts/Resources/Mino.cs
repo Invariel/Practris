@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Mino
@@ -35,6 +36,8 @@ public class Mino
             CacheResourceStyle(style);
         }
     }
+
+    public static List<string> GetCachedStyles() => _minoSpriteData.Keys.ToList();
 
     private static void CacheResourceStyle(string style)
     {

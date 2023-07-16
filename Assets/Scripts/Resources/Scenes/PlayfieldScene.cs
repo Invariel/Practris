@@ -47,15 +47,11 @@ public class PlayfieldScene : MonoBehaviour
     private int _rotateRight = 1;
 
     // Game state stuff.
-    [SerializeField]
-    private TMP_Text txt_Lines;
-
-    [SerializeField]
-    private TMP_Text lbl_RotationData;
-
-    [SerializeField]
-    private TMP_Text txt_RotationData;
-
+    [SerializeField] private TMP_Text txt_Lines;
+    [SerializeField] private TMP_Text lbl_RotationData;
+    [SerializeField] private TMP_Text txt_RotationData;
+    [SerializeField] private TMP_Dropdown _currentStyle;
+    private string CurrentStyle { get => _currentStyle.options[_currentStyle.value].text; }
 
     public int linesCleared = 0;
     public int[] completedRows;
@@ -68,9 +64,30 @@ public class PlayfieldScene : MonoBehaviour
         // Load the settings if they exist, if not this will create a fresh Settings file to modify later.
         userInput.LoadSettingsFromFile();
         userInput.SaveSettingsToFile();
-
+        
         StartNewGame();
+
+        PopulateDropdown();
+        AssignDropdown();
     }
+
+    private void PopulateDropdown()
+    {
+        _currentStyle.ClearOptions();
+        _currentStyle.AddOptions(Mino.GetCachedStyles());
+    }
+
+    private void AssignDropdown()
+    {
+        TMP_Dropdown.OptionData dropdownValue = _currentStyle.options.FirstOrDefault(data => data.text.Equals(gameSettings.Style, StringComparison.OrdinalIgnoreCase));
+        if (dropdownValue != null)
+        {
+            _currentStyle.value = _currentStyle.options.IndexOf(dropdownValue);
+        }
+    }
+
+    public void StyleChanged() => gameBoard.SetStyle(CurrentStyle);
+
 
     public void StartNewGame ()
     {
