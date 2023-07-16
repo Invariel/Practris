@@ -2,6 +2,8 @@ using System.Collections.Generic;
 
 public static class Constants
 {
+    public static string[] _resourceStyles = new[] { "Original", "v2", "v3", "v4", "v5" };
+
     private static Dictionary<Scene, string> SceneNames = new Dictionary<Scene, string>()
     {
         { Scene.EDIT, "EditBoard" },

@@ -1,9 +1,12 @@
 using SFB;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class SettingsScene : MonoBehaviour
 {
@@ -17,11 +20,17 @@ public class SettingsScene : MonoBehaviour
     [SerializeField] private TMP_InputField input_Left;
     [SerializeField] private TMP_InputField input_Right;
 
-    [SerializeField] private TMP_Dropdown drp_Style;
+    [SerializeField] private TMP_Dropdown drp_Style_TMP;
+    [SerializeField] private Dropdown drp_Style;
 
 
     // Start is called before the first frame update
     void Start()
+    {
+        InitialSettings();
+    }
+
+    public void InitialSettings()
     {
         _userInput.LoadSettingsFromFile();
 
@@ -53,10 +62,26 @@ public class SettingsScene : MonoBehaviour
             textField.text = input;
     }
 
-    public void FillDropDown(TMP_Dropdown dropdown)
+    public void FillDropDown(Dropdown dropdown)
     {
-        string[] styles = Directory.GetDirectories("./Styles/");
-        drp_Style.AddOptions(styles.ToList<string>());
+        drp_Style.ClearOptions();
+
+        drp_Style.AddOptions(Constants._resourceStyles.ToList());
+
+        /*
+            string[] styles = Directory.GetDirectories("./Styles/");
+            drp_Style.AddOptions(styles.ToList<string>());
+        */
+    }
+
+    public void ChangedStyle()
+    {
+        _settings.Style = drp_Style.options[drp_Style.value].text;
+    }
+
+    public void SaveSettings()
+    {
+        _userInput.SaveSettingsToFile();
     }
 
     // Update is called once per frame

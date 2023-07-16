@@ -12,8 +12,6 @@ public class Mino
     private static float _sideBlockSize = 0.3125f;
     private static Vector3 _sideBlockScale = new Vector3(_sideBlockSize, _sideBlockSize, _sideBlockSize);
 
-    private static string[] _resourceStyles = new[] { "Original", "v2", "v3", "v4", "v5" };
-
     private static Dictionary<MinoEnum, MinoData> _minoData = new Dictionary<MinoEnum, MinoData>()
     {
         { MinoEnum.Empty, new MinoData() { MinoName = "Empty", MinoSpriteName = "Mino_Empty", MinoShadowName = "Mino_Empty" } },
@@ -32,7 +30,7 @@ public class Mino
 
     public static void CacheResourceMinos()
     {
-        foreach (string style in _resourceStyles)
+        foreach (string style in Constants._resourceStyles)
         {
             CacheResourceStyle(style);
         }
