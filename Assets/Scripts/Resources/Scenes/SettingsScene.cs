@@ -7,7 +7,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 using Image = UnityEngine.UI.Image;
+using Button = UnityEngine.UI.Button;
 
 public class SettingsScene : MonoBehaviour
 {
@@ -15,19 +17,65 @@ public class SettingsScene : MonoBehaviour
     public UserInput _userInput;
     Settings _settings { get => _userInput.gameSettings; }
 
-    // Movement
-    [SerializeField] private TMP_InputField input_Up;
-    [SerializeField] private TMP_InputField input_Down;
-    [SerializeField] private TMP_InputField input_Left;
-    [SerializeField] private TMP_InputField input_Right;
+    #region Movement UI Controls
+    public TMP_InputField Up_inputField;
+    public TMP_Text Up_tooltipField;
+    public Button Up_tooltipButton;
 
-    // Rotation
-    [SerializeField] private TMP_InputField input_RotateLeft;
-    [SerializeField] private TMP_InputField input_RotateRight;
-    [SerializeField] private TMP_InputField input_ShadowLeft;
-    [SerializeField] private TMP_InputField input_ShadowRight;
+    public TMP_InputField Down_inputField;
+    public TMP_Text Down_tooltipField;
+    public Button Down_tooltipButton;
 
-    // Other Controls
+    public TMP_InputField Left_inputField;
+    public TMP_Text Left_tooltipField;
+    public Button Left_tooltipButton;
+
+    public TMP_InputField Right_inputField;
+    public TMP_Text Right_tooltipField;
+    public Button Right_tooltipButton;
+    #endregion
+
+    #region Rotation UI Controls
+    public TMP_InputField RotateLeft_inputField;
+    public TMP_Text RotateLeft_tooltipField;
+    public Button RotateLeft_tooltipButton;
+
+    public TMP_InputField RotateRight_inputField;
+    public TMP_Text RotateRight_tooltipField;
+    public Button RotateRight_tooltipButton;
+
+    public TMP_InputField ShadowLeft_inputField;
+    public TMP_Text ShadowLeft_tooltipField;
+    public Button ShadowLeft_tooltipButton;
+
+    public TMP_InputField ShadowRight_inputField;
+    public TMP_Text ShadowRight_tooltipField;
+    public Button ShadowRight_tooltipButton;
+    #endregion
+
+    #region Time Travel UI Controls
+    public TMP_InputField Rewind_inputField;
+    public TMP_Text Rewind_tooltipField;
+    public Button Rewind_tooltipButton;
+
+    public TMP_InputField Forward_inputField;
+    public TMP_Text Forward_tooltipField;
+    public Button Forward_tooltipButton;
+    #endregion
+
+    #region Other Controls
+    public TMP_InputField Hold_inputField;
+    public TMP_Text Hold_tooltipField;
+    public Button Hold_tooltipButton;
+
+    public TMP_InputField Accept_inputField;
+    public TMP_Text Accept_tooltipField;
+    public Button Accept_tooltipButton;
+
+    public TMP_InputField Menu_inputField;
+    public TMP_Text Menu_tooltipField;
+    public Button Menu_tooltipButton;
+    #endregion
 
     // Style
     [SerializeField] private TMP_Dropdown drp_Style;
@@ -58,15 +106,22 @@ public class SettingsScene : MonoBehaviour
 
     public void SetupMenu()
     {
-        AssignKeys(input_Up, _settings.Up);
-        AssignKeys(input_Down, _settings.Down);
-        AssignKeys(input_Left, _settings.Left);
-        AssignKeys(input_Right, _settings.Right);
+        AssignKeys(Up_inputField, _settings.Up);
+        AssignKeys(Down_inputField, _settings.Down);
+        AssignKeys(Left_inputField, _settings.Left);
+        AssignKeys(Right_inputField, _settings.Right);
 
-        AssignKeys(input_RotateLeft, _settings.SpinLeft);
-        AssignKeys(input_RotateRight, _settings.SpinRight);
-        AssignKeys(input_ShadowLeft, _settings.RotationLeft);
-        AssignKeys(input_ShadowRight, _settings.RotationRight);
+        AssignKeys(RotateLeft_inputField, _settings.SpinLeft);
+        AssignKeys(RotateRight_inputField, _settings.SpinRight);
+        AssignKeys(ShadowLeft_inputField, _settings.RotationLeft);
+        AssignKeys(ShadowRight_inputField, _settings.RotationRight);
+
+        AssignKeys(Rewind_inputField, _settings.Rewind);
+        AssignKeys(Forward_inputField, _settings.Forward);
+
+        AssignKeys(Hold_inputField, _settings.HoldPiece);
+        AssignKeys(Accept_inputField, _settings.Accept);
+        AssignKeys(Menu_inputField, _settings.Menu);
 
         FillDropDown(drp_Style);
         AssignDropDown(drp_Style, _settings.Style);
