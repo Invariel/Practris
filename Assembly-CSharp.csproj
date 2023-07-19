@@ -61,6 +61,7 @@
     <Compile Include="Assets\Scripts\Resources\GameState.cs" />
     <Compile Include="Assets\Scripts\Resources\Constants.cs" />
     <Compile Include="Assets\StandaloneFileBrowser\StandaloneFileBrowserWindows.cs" />
+    <Compile Include="Assets\Scripts\Resources\TooltipData.cs" />
     <Compile Include="Assets\StandaloneFileBrowser\StandaloneFileBrowser.cs" />
     <Compile Include="Assets\Scripts\Resources\Scenes\TitleScene.cs" />
     <Compile Include="Assets\Scripts\Resources\GameBoard.cs" />
