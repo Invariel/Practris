@@ -64,6 +64,7 @@
     <Compile Include="Assets\Scripts\Resources\TooltipData.cs" />
     <Compile Include="Assets\StandaloneFileBrowser\StandaloneFileBrowser.cs" />
     <Compile Include="Assets\Scripts\Resources\Scenes\TitleScene.cs" />
+    <Compile Include="Assets\Scripts\Resources\InputBinding.cs" />
     <Compile Include="Assets\Scripts\Resources\GameBoard.cs" />
     <Compile Include="Assets\Scripts\Resources\StaticData.cs" />
     <Compile Include="Assets\StandaloneFileBrowser\StandaloneFileBrowserEditor.cs" />

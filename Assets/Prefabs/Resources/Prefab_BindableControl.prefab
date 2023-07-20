@@ -676,6 +676,7 @@ GameObject:
   - component: {fileID: 8234738523802985151}
   - component: {fileID: 383562270630755748}
   - component: {fileID: 3147302050297818659}
+  - component: {fileID: 1431691525328388063}
   m_Layer: 0
   m_Name: btn_Bind_Field
   m_TagString: Untagged
@@ -786,6 +787,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1431691525328388063
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4745262707933382425}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b791b44e81e5d7f498d64699ad05c9e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  myself: {fileID: 0}
 --- !u!1 &5210404609686751663
 GameObject:
   m_ObjectHideFlags: 0
