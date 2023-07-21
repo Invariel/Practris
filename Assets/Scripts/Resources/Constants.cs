@@ -21,4 +21,21 @@ public static class Constants
     }
 
     public static string GetScene(Scene scene) => SceneNames[scene] ?? string.Empty;
+
+    public enum SettingsField
+    {
+        Up,
+        Down,
+        Left,
+        Right,
+        SpinLeft,
+        SpinRight,
+        RotationLeft,
+        RotationRight,
+        Rewind,
+        Forward,
+        HoldPiece,
+        Accept,
+        Menu
+    }
 }

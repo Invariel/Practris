@@ -28,76 +28,28 @@ public class SettingsScene : MonoBehaviour
     Settings _settings { get => _userInput.gameSettings; }
 
     #region Movement UI Controls
-    public TMP_InputField Up_inputField;
-    public Button Up_tooltipButton;
-    public GameObject Up_tooltipContainer;
-    public Button Up_bindButton;
-
-    public TMP_InputField Down_inputField;
-    public Button Down_tooltipButton;
-    public GameObject Down_tooltipContainer;
-    public Button Down_bindButton;
-
-    public TMP_InputField Left_inputField;
-    public Button Left_tooltipButton;
-    public GameObject Left_tooltipContainer;
-    public Button Left_bindButton;
-
-    public TMP_InputField Right_inputField;
-    public Button Right_tooltipButton;
-    public GameObject Right_tooltipContainer;
-    public Button Right_bindButton;
+    public GameObject go_Up;
+    public GameObject go_Down;
+    public GameObject go_Left;
+    public GameObject go_Right;
     #endregion
 
     #region Rotation UI Controls
-    public TMP_InputField RotateLeft_inputField;
-    public Button RotateLeft_tooltipButton;
-    public GameObject RotateLeft_tooltipContainer;
-    public Button RotateLeft_bindButton;
-
-    public TMP_InputField RotateRight_inputField;
-    public Button RotateRight_tooltipButton;
-    public GameObject RotateRight_tooltipContainer;
-    public Button RotateRight_bindButton;
-
-    public TMP_InputField ShadowLeft_inputField;
-    public Button ShadowLeft_tooltipButton;
-    public GameObject ShadowLeft_tooltipContainer;
-    public Button ShadowLeft_bindButton;
-
-    public TMP_InputField ShadowRight_inputField;
-    public Button ShadowRight_tooltipButton;
-    public GameObject ShadowRight_tooltipContainer;
-    public Button ShadowRight_bindButton;
+    public GameObject go_SpinLeft;
+    public GameObject go_SpinRight;
+    public GameObject go_RotationLeft;
+    public GameObject go_RotationRight;
     #endregion
 
     #region Time Travel UI Controls
-    public TMP_InputField Rewind_inputField;
-    public Button Rewind_tooltipButton;
-    public GameObject Rewind_tooltipContainer;
-    public Button Rewind_bindButton;
-
-    public TMP_InputField Forward_inputField;
-    public Button Forward_tooltipButton;
-    public GameObject Forward_tooltipContainer;
-    public Button Forward_bindButton;
+    public GameObject go_Rewind;
+    public GameObject go_Forward;
     #endregion
 
     #region Other Controls
-    public TMP_InputField Hold_inputField;
-    public Button Hold_tooltipButton;
-    public GameObject Hold_tooltipContainer;
-    public Button Hold_bindButton;
-
-    public TMP_InputField Accept_inputField;
-    public Button Accept_tooltipButton;
-    public GameObject Accept_tooltipContainer;
-    public Button Accept_bindButton;
-
-    public TMP_InputField Menu_inputField;
-    public Button Menu_tooltipButton;
-    public GameObject Menu_tooltipContainer;
-    public Button Menu_bindButton;
+    public GameObject go_HoldPiece;
+    public GameObject go_Accept;
+    public GameObject go_Menu;
     #endregion
 
     public GameObject BindingTextbox;
@@ -118,7 +70,7 @@ public class SettingsScene : MonoBehaviour
     [SerializeField] private Image img_mino_T;
     [SerializeField] private Image img_mino_Z;
 
-    private List<Tuple<Button, TMP_InputField, KeyCode[], string>> settingsMapping = new List<Tuple<Button, TMP_InputField, KeyCode[], string>>();
+    private List<Tuple<GameObject, string>> settingsMapping = new List<Tuple<GameObject, string>>();
 
     // Start is called before the first frame update
     void Start()
@@ -132,101 +84,102 @@ public class SettingsScene : MonoBehaviour
 
         SetupMenu();
 
-        InputBinding.scene = this;
+        InputBinding._scene = this;
+        ClearButton._scene = this;
 
-        ConfigureTooltip(Up_tooltipButton, Up_tooltipContainer, "The button(s) used to move the piece up.");
-        ConfigureTooltip(Down_tooltipButton, Down_tooltipContainer, "The button(s) used to move the piece down.  Moving a piece down into a blocked space will lock it.");
-        ConfigureTooltip(Left_tooltipButton, Left_tooltipContainer, "The button(s) used to move the piece to the left.");
-        ConfigureTooltip(Right_tooltipButton, Right_tooltipContainer, "The button(s) used to move the piece to the right.");
+        ConfigureContainer(go_Up, name: "Up", settingName: Constants.SettingsField.Up, tooltipText: "The button(s) used to move the piece up.");
+        ConfigureContainer(go_Down, name: "Down", settingName: Constants.SettingsField.Down, tooltipText: "The button(s) used to move the piece down.  Moving a piece down into a blocked space will lock it.");
+        ConfigureContainer(go_Left, name: "Left", settingName: Constants.SettingsField.Left, tooltipText: "The button(s) used to move the piece to the left.");
+        ConfigureContainer(go_Right, name: "Right", settingName: Constants.SettingsField.Right, tooltipText: "The button(s) used to move the piece to the right.");
 
-        ConfigureTooltip(RotateLeft_tooltipButton, RotateLeft_tooltipContainer, "The button(s) used to rotate the piece to the left (counter-clockwise).");
-        ConfigureTooltip(RotateRight_tooltipButton, RotateRight_tooltipContainer, "The button(s) used to rotate the piece to the right (clockwise).");
-        ConfigureTooltip(ShadowLeft_tooltipButton, ShadowLeft_tooltipContainer, "The button(s) used to cycle through the checked counter-clockwise rotation positions.");
-        ConfigureTooltip(ShadowRight_tooltipButton, ShadowRight_tooltipContainer, "The button(s) used to cycle through the checked clockwise rotation positions.");
+        ConfigureContainer(go_SpinLeft, name: "Rotate Left", settingName: Constants.SettingsField.SpinLeft, tooltipText: "The button(s) used to rotate the piece to the left (counter-clockwise).");
+        ConfigureContainer(go_SpinRight, name: "Rotate Right", settingName: Constants.SettingsField.SpinRight, tooltipText: "The button(s) used to rotate the piece to the right (clockwise).");
+        ConfigureContainer(go_RotationLeft, name: "Shadow Left", settingName: Constants.SettingsField.RotationLeft, tooltipText: "The button(s) used to cycle through the checked counter-clockwise rotation positions.");
+        ConfigureContainer(go_RotationRight, name: "Shadow Right", settingName: Constants.SettingsField.RotationRight, tooltipText: "The button(s) used to cycle through the checked clockwise rotation positions.");
 
-        ConfigureTooltip(Rewind_tooltipButton, Rewind_tooltipContainer, "The button(s) used to rewind time by one step.  Press \"Accept\" to resume from the chosen point.");
-        ConfigureTooltip(Forward_tooltipButton, Forward_tooltipContainer, "The button(s) used to advance time by one step.  Press \"Accept\" to resume from the chosen point.");
+        ConfigureContainer(go_Rewind, name: "Rewind", settingName: Constants.SettingsField.Rewind, tooltipText: "The button(s) used to rewind time by one step.  Press \"Accept\" to resume from the chosen point.");
+        ConfigureContainer(go_Forward, name: "Forward", settingName: Constants.SettingsField.Forward, tooltipText: "The button(s) used to advance time by one step.  Press \"Accept\" to resume from the chosen point.");
 
-        ConfigureTooltip(Hold_tooltipButton, Hold_tooltipContainer, "The button(s) used to hold the current piece, swapping with the current held piece if one exists.");
-        ConfigureTooltip(Accept_tooltipButton, Accept_tooltipContainer, "The button(s) used to accept the game state, and also to fast-drop the current piece.");
-        ConfigureTooltip(Menu_tooltipButton, Menu_tooltipContainer, "The button(s) used to cancel out of the session and to back out of menus.");
-
-        foreach (Button button in new[] { Up_bindButton, Down_bindButton, Left_bindButton, Right_bindButton,
-            RotateLeft_bindButton, RotateRight_bindButton, ShadowLeft_bindButton, ShadowRight_bindButton,
-            Rewind_bindButton, Forward_bindButton, Hold_bindButton, Accept_bindButton })
-        {
-            ConfigureBindButton(button);
-        }
+        ConfigureContainer(go_HoldPiece, name: "Hold Piece", settingName: Constants.SettingsField.HoldPiece, tooltipText: "The button(s) used to hold the current piece, swapping with the current held piece if one exists.");
+        ConfigureContainer(go_Accept, name: "Accept / Drop", settingName: Constants.SettingsField.Accept, tooltipText: "The button(s) used to accept the game state, and also to fast-drop the current piece.");
+        ConfigureContainer(go_Menu, name: "Cancel / Menu", settingName: Constants.SettingsField.Menu, tooltipText: "The button(s) used to cancel out of the session and to back out of menus.");
 
         ConfigureInputFieldMapping();
+    }
+
+    public void ConfigureContainer (GameObject container, Constants.SettingsField settingName, string name, string tooltipText)
+    {
+        container.GetComponent<ContainerInformation>()._myself = container;
+        container.GetComponent<ContainerInformation>()._settingName = settingName;
+        container.GetComponent<ContainerInformation>()._name = name;
+        ConfigureTooltip(container, tooltipText);
     }
 
     public void ConfigureInputFieldMapping()
     {
         settingsMapping.Clear();
 
-        settingsMapping.Add(new Tuple<Button, TMP_InputField, KeyCode[], string>(Up_bindButton, Up_inputField, _settings.Up, "Up"));
-        settingsMapping.Add(new Tuple<Button, TMP_InputField, KeyCode[], string>(Down_bindButton, Down_inputField, _settings.Down, "Down"));
-        settingsMapping.Add(new Tuple<Button, TMP_InputField, KeyCode[], string>(Left_bindButton, Left_inputField, _settings.Left, "Left"));
-        settingsMapping.Add(new Tuple<Button, TMP_InputField, KeyCode[], string>(Right_bindButton, Right_inputField, _settings.Right, "Right"));
+        settingsMapping.Add(new Tuple<GameObject, string>(go_Up, "Up"));
+        settingsMapping.Add(new Tuple<GameObject, string>(go_Down, "Down"));
+        settingsMapping.Add(new Tuple<GameObject, string>(go_Left, "Left"));
+        settingsMapping.Add(new Tuple<GameObject, string>(go_Right, "Right"));
 
-        settingsMapping.Add(new Tuple<Button, TMP_InputField, KeyCode[], string>(RotateLeft_bindButton, RotateLeft_inputField, _settings.SpinLeft, "Rotate Left"));
-        settingsMapping.Add(new Tuple<Button, TMP_InputField, KeyCode[], string>(RotateRight_bindButton, RotateRight_inputField, _settings.SpinRight, "Rotate Right"));
-        settingsMapping.Add(new Tuple<Button, TMP_InputField, KeyCode[], string>(ShadowLeft_bindButton, ShadowLeft_inputField, _settings.RotationLeft, "Shadow Left"));
-        settingsMapping.Add(new Tuple<Button, TMP_InputField, KeyCode[], string>(ShadowRight_bindButton, ShadowRight_inputField, _settings.RotationRight, "Shadow Right"));
+        settingsMapping.Add(new Tuple<GameObject, string>(go_SpinLeft, "Rotate Left"));
+        settingsMapping.Add(new Tuple<GameObject, string>(go_SpinRight, "Rotate Right"));
+        settingsMapping.Add(new Tuple<GameObject, string>(go_RotationLeft, "Shadow Left"));
+        settingsMapping.Add(new Tuple<GameObject, string>(go_RotationRight, "Shadow Right"));
 
-        settingsMapping.Add(new Tuple<Button, TMP_InputField, KeyCode[], string>(Rewind_bindButton, Rewind_inputField, _settings.Rewind, "Rewind"));
-        settingsMapping.Add(new Tuple<Button, TMP_InputField, KeyCode[], string>(Forward_bindButton, Forward_inputField, _settings.Forward, "Forward"));
+        settingsMapping.Add(new Tuple<GameObject, string>(go_Rewind, "Rewind"));
+        settingsMapping.Add(new Tuple<GameObject, string>(go_Forward, "Forward"));
 
-        settingsMapping.Add(new Tuple<Button, TMP_InputField, KeyCode[], string>(Hold_bindButton, Hold_inputField, _settings.HoldPiece, "Hold"));
-        settingsMapping.Add(new Tuple<Button, TMP_InputField, KeyCode[], string>(Accept_bindButton, Accept_inputField, _settings.Accept, "Drop / Accept"));
+        settingsMapping.Add(new Tuple<GameObject, string>(go_HoldPiece, "Hold Piece"));
+        settingsMapping.Add(new Tuple<GameObject, string>(go_Accept, "Drop / Accept"));
 
         // Intentionally not letting Menu/Back/Cancel be remapped.  Sorry everyone.
     }
 
-    public void ConfigureTooltip (Button button, GameObject tooltipContainer, string tooltipText)
+    public void ConfigureTooltip (GameObject container, string tooltipText)
     {
-        var tooltipData = button.GetComponent<TooltipData>();
-        tooltipData.myself = button;
+        var tooltipButton = container.GetComponentInChildren<TooltipData>().GetComponentInParent<Button>();
 
-        tooltipData.tooltip = tooltipContainer.GetComponentInChildren<TMP_Text>();
-        tooltipData.image = tooltipContainer.GetComponentInChildren<Image>();
-        tooltipData.tooltipText = tooltipText;
+        var tooltipData = tooltipButton.GetComponent<TooltipData>();
+        tooltipData._myself = tooltipButton;
+
+        tooltipData.container = container;
+        tooltipData._tooltip = container.GetComponent<ContainerInformation>().GetTooltipText();
+        tooltipData._image = container.GetComponent<ContainerInformation>().GetTooltipImage();
+        tooltipData._tooltipText = tooltipText;
 
         tooltipData.ConfigureEvents();
     }
 
-    public void ConfigureBindButton(Button button)
-    {
-        var inputBinding = button.GetComponent<InputBinding>();
-        inputBinding.myself = button;
-    }
-
     public void SetupMenu()
     {
-        InitialAssignKeys(Up_inputField, _settings.Up);
-        InitialAssignKeys(Down_inputField, _settings.Down);
-        InitialAssignKeys(Left_inputField, _settings.Left);
-        InitialAssignKeys(Right_inputField, _settings.Right);
+        InitialAssignKeys(go_Up, _settings.Up);
+        InitialAssignKeys(go_Down, _settings.Down);
+        InitialAssignKeys(go_Left, _settings.Left);
+        InitialAssignKeys(go_Right, _settings.Right);
 
-        InitialAssignKeys(RotateLeft_inputField, _settings.SpinLeft);
-        InitialAssignKeys(RotateRight_inputField, _settings.SpinRight);
-        InitialAssignKeys(ShadowLeft_inputField, _settings.RotationLeft);
-        InitialAssignKeys(ShadowRight_inputField, _settings.RotationRight);
+        InitialAssignKeys(go_SpinLeft, _settings.SpinLeft);
+        InitialAssignKeys(go_SpinRight, _settings.SpinRight);
+        InitialAssignKeys(go_RotationLeft, _settings.RotationLeft);
+        InitialAssignKeys(go_RotationRight, _settings.RotationRight);
 
-        InitialAssignKeys(Rewind_inputField, _settings.Rewind);
-        InitialAssignKeys(Forward_inputField, _settings.Forward);
+        InitialAssignKeys(go_Rewind, _settings.Rewind);
+        InitialAssignKeys(go_Forward, _settings.Forward);
 
-        InitialAssignKeys(Hold_inputField, _settings.HoldPiece);
-        InitialAssignKeys(Accept_inputField, _settings.Accept);
-        InitialAssignKeys(Menu_inputField, _settings.Menu);
+        InitialAssignKeys(go_HoldPiece, _settings.HoldPiece);
+        InitialAssignKeys(go_Accept, _settings.Accept);
+        InitialAssignKeys(go_Menu, _settings.Menu);
 
         FillDropDown(drp_Style);
         AssignDropDown(drp_Style, _settings.Style);
     }
 
-    public void InitialAssignKeys(TMP_InputField textField, KeyCode[] keys)
+    public void InitialAssignKeys(GameObject container, KeyCode[] keys)
     {
+        TMP_InputField inputField = container.GetComponentInChildren<TMP_InputField>();
+
         string input = "";
 
         foreach (var key in keys)
@@ -234,10 +187,13 @@ public class SettingsScene : MonoBehaviour
             input = $"{input} {key},";
         }
 
-        input = input.Substring(0, input.Length - 1);
+        if (input.Length > 0)
+        {
+            input = input.Substring(0, input.Length - 1);
+        }
 
-        if (textField is not null)
-            textField.text = input;
+        if (inputField is not null)
+            inputField.text = input;
     }
 
     public void FillDropDown(TMP_Dropdown dropdown)
@@ -344,25 +300,13 @@ public class SettingsScene : MonoBehaviour
             image.enabled = true;
         }
 
-        bindingTextbox.text = $"Press a key to bind to {GetDescriptionFromButton(whichButton)}.";
+        bindingTextbox.text = $"Press a key to bind to {whichButton.GetComponentInParent<ContainerInformation>()._name}.";
         bindingTextbox.enabled = true;
 
         binding = true;
         justClicked = true;
-        bindingInputField = GetSettingsFieldFromButton(whichButton);
+        bindingInputField = whichButton.GetComponentInParent<ContainerInformation>().GetInputField();
     }
-
-    public TMP_InputField GetSettingsFieldFromButton(Button whichButton)
-        => settingsMapping.First(t => t.Item1 == whichButton).Item2;
-
-    public KeyCode[] GetSettingsFromButton(Button whichButton)
-        => settingsMapping.First(t => t.Item1 == whichButton).Item3;
-
-    public string GetDescriptionFromButton(Button whichButton)
-        => settingsMapping.First(t => t.Item1 == whichButton).Item4;
-
-    public KeyCode[] GetSettingsFromField(TMP_InputField whichField)
-        => settingsMapping.First(t => t.Item2 == whichField).Item3;
 
     // Update is called once per frame
     void Update()
@@ -427,84 +371,103 @@ public class SettingsScene : MonoBehaviour
         }
     }
 
+    public void ClearKeys (Constants.SettingsField setting)
+    {
+        ClearSettings(setting);
+        BindingComplete();
+    }
+
     public void AssignNewKey(KeyCode key)
     {
         List<KeyCode> keys;
 
-        if (bindingInputField == Up_inputField)
-        {
-            keys = _settings.Up.ToList();
-            keys.Add(key);
-            _settings.Up = keys.Distinct().ToArray();
-        }
-        else if (bindingInputField == Down_inputField)
-        {
-            keys = _settings.Down.ToList();
-            keys.Add(key);
-            _settings.Down = keys.Distinct().ToArray();
-        }
-        else if (bindingInputField == Left_inputField)
-        {
-            keys = _settings.Left.ToList();
-            keys.Add(key);
-            _settings.Left = keys.Distinct().ToArray();
-        }
-        else if (bindingInputField == Right_inputField)
-        {
-            keys = _settings.Right.ToList();
-            keys.Add(key);
-            _settings.Right = keys.Distinct().ToArray();
-        }
+        var container = bindingInputField.GetComponentInParent<ContainerInformation>()._myself;
 
-        else if (bindingInputField == RotateLeft_inputField)
+        switch (container.GetComponent<ContainerInformation>()._settingName)
         {
-            keys = _settings.SpinLeft.ToList();
-            keys.Add(key);
-            _settings.SpinLeft = keys.Distinct().ToArray();
-        }
-        else if (bindingInputField == RotateRight_inputField)
-        {
-            keys = _settings.SpinRight.ToList();
-            keys.Add(key);
-            _settings.SpinRight = keys.Distinct().ToArray();
-        }
-        else if (bindingInputField == ShadowLeft_inputField)
-        {
-            keys = _settings.RotationLeft.ToList();
-            keys.Add(key);
-            _settings.RotationLeft = keys.Distinct().ToArray();
-        }
-        else if (bindingInputField == ShadowRight_inputField)
-        {
-            keys = _settings.RotationRight.ToList();
-            keys.Add(key);
-            _settings.RotationRight = keys.Distinct().ToArray();
-        }
+            case Constants.SettingsField.Up:
+                keys = _settings.Up.ToList();
+                keys.Add(key);
+                _settings.Up = keys.Distinct().ToArray();
+                break;
 
-        else if (bindingInputField == Rewind_inputField)
-        {
-            keys = _settings.Rewind.ToList();
-            keys.Add(key);
-            _settings.Rewind = keys.Distinct().ToArray();
-        }
-        else if (bindingInputField == Forward_inputField)
-        {
-            keys = _settings.Forward.ToList();
-            keys.Add(key);
-            _settings.Forward = keys.Distinct().ToArray();
-        }
+            case Constants.SettingsField.Down:
+                keys = _settings.Down.ToList();
+                keys.Add(key);
+                _settings.Down = keys.Distinct().ToArray();
+                break;
 
-        else if (bindingInputField == Hold_inputField)
-        {
-            keys = _settings.HoldPiece.ToList();
-            keys.Add(key);
-            _settings.HoldPiece = keys.Distinct().ToArray();
-        }
-        else if (bindingInputField == Accept_inputField)
-        {
-            keys = _settings.Accept.ToList();
-            keys.Add(key);
-            _settings.Accept = keys.Distinct().ToArray();
+            case Constants.SettingsField.Left:
+                keys = _settings.Left.ToList();
+                keys.Add(key);
+                _settings.Left = keys.Distinct().ToArray();
+                break;
+
+            case Constants.SettingsField.Right:
+                keys = _settings.Right.ToList();
+                keys.Add(key);
+                _settings.Right = keys.Distinct().ToArray();
+                break;
+
+
+
+            case Constants.SettingsField.SpinLeft:
+                keys = _settings.SpinLeft.ToList();
+                keys.Add(key);
+                _settings.SpinLeft = keys.Distinct().ToArray();
+                break;
+
+            case Constants.SettingsField.SpinRight:
+                keys = _settings.SpinRight.ToList();
+                keys.Add(key);
+                _settings.SpinRight = keys.Distinct().ToArray();
+                break;
+
+            case Constants.SettingsField.RotationLeft:
+                keys = _settings.RotationLeft.ToList();
+                keys.Add(key);
+                _settings.RotationLeft = keys.Distinct().ToArray();
+                break;
+
+            case Constants.SettingsField.RotationRight:
+                keys = _settings.RotationRight.ToList();
+                keys.Add(key);
+                _settings.RotationRight = keys.Distinct().ToArray();
+                break;
+
+
+
+            case Constants.SettingsField.Rewind:
+                keys = _settings.Rewind.ToList();
+                keys.Add(key);
+                _settings.Rewind = keys.Distinct().ToArray();
+                break;
+
+            case Constants.SettingsField.Forward:
+                keys = _settings.Forward.ToList();
+                keys.Add(key);
+                _settings.Forward = keys.Distinct().ToArray();
+                break;
+
+
+
+            case Constants.SettingsField.HoldPiece:
+                keys = _settings.HoldPiece.ToList();
+                keys.Add(key);
+                _settings.HoldPiece = keys.Distinct().ToArray();
+                break;
+
+            case Constants.SettingsField.Accept:
+                keys = _settings.Accept.ToList();
+                keys.Add(key);
+                _settings.Accept = keys.Distinct().ToArray();
+                break;
+
+            case Constants.SettingsField.Menu:
+                keys = _settings.Menu.ToList();
+                keys.Add(key);
+                _settings.Menu = keys.Distinct().ToArray();
+                break;
         }
     }
 
@@ -565,6 +528,49 @@ public class SettingsScene : MonoBehaviour
         keys = _settings.Accept.ToList();
         keys.Remove(key);
         _settings.Accept = keys.Distinct().ToArray();
+    }
+
+    public void ClearSettings (Constants.SettingsField setting)
+    {
+        switch (setting)
+        {
+            case Constants.SettingsField.Up:
+                _settings.Up = new KeyCode[] { };
+                break;
+            case Constants.SettingsField.Down:
+                _settings.Down = new KeyCode[] { };
+                break;
+            case Constants.SettingsField.Left:
+                _settings.Left = new KeyCode[] { };
+                break;
+            case Constants.SettingsField.Right:
+                _settings.Right = new KeyCode[] { };
+                break;
+            case Constants.SettingsField.SpinLeft:
+                _settings.SpinLeft = new KeyCode[] { };
+                break;
+            case Constants.SettingsField.SpinRight:
+                _settings.SpinRight = new KeyCode[] { };
+                break;
+            case Constants.SettingsField.RotationLeft:
+                _settings.RotationLeft = new KeyCode[] { };
+                break;
+            case Constants.SettingsField.RotationRight:
+                _settings.RotationRight = new KeyCode[] { };
+                break;
+            case Constants.SettingsField.Rewind:
+                _settings.Rewind = new KeyCode[] { };
+                break;
+            case Constants.SettingsField.Forward:
+                _settings.Forward = new KeyCode[] { };
+                break;
+            case Constants.SettingsField.HoldPiece:
+                _settings.HoldPiece = new KeyCode[] { };
+                break;
+            case Constants.SettingsField.Accept:
+                _settings.Accept = new KeyCode[] { };
+                break;
+        }
     }
 
     public void BindingComplete()

@@ -12,12 +12,12 @@ namespace Assets.Scripts.Resources
 {
     public class InputBinding : MonoBehaviour, IPointerDownHandler
     {
-        public static SettingsScene scene;
-        public Button myself;
+        public static SettingsScene _scene;
+        public Button _myself;
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            scene.StartInputBinding(myself);
+            _scene.StartInputBinding(_myself);
         }
     }
 }

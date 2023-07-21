@@ -60,12 +60,13 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\Resources\GameState.cs" />
     <Compile Include="Assets\Scripts\Resources\Constants.cs" />
+    <Compile Include="Assets\Scripts\Resources\Behaviours\InputBinding.cs" />
     <Compile Include="Assets\StandaloneFileBrowser\StandaloneFileBrowserWindows.cs" />
-    <Compile Include="Assets\Scripts\Resources\TooltipData.cs" />
+    <Compile Include="Assets\Scripts\Resources\Behaviours\ClearButton.cs" />
     <Compile Include="Assets\StandaloneFileBrowser\StandaloneFileBrowser.cs" />
     <Compile Include="Assets\Scripts\Resources\Scenes\TitleScene.cs" />
-    <Compile Include="Assets\Scripts\Resources\InputBinding.cs" />
     <Compile Include="Assets\Scripts\Resources\GameBoard.cs" />
+    <Compile Include="Assets\Scripts\Resources\Behaviours\ContainerInformation.cs" />
     <Compile Include="Assets\Scripts\Resources\StaticData.cs" />
     <Compile Include="Assets\StandaloneFileBrowser\StandaloneFileBrowserEditor.cs" />
     <Compile Include="Assets\Scripts\Resources\Settings.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="Assets\StandaloneFileBrowser\StandaloneFileBrowserLinux.cs" />
     <Compile Include="Assets\Scripts\Resources\UserInput.cs" />
     <Compile Include="Assets\StandaloneFileBrowser\StandaloneFileBrowserMac.cs" />
+    <Compile Include="Assets\Scripts\Resources\Behaviours\TooltipData.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
