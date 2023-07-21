@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
 public class TitleScene : MonoBehaviour
 {
     void Start() { Mino.CacheResourceMinos(); }

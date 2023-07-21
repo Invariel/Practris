@@ -1,20 +1,15 @@
-using SFB;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
-using UnityEngine.UIElements;
-using Image = UnityEngine.UI.Image;
-using Button = UnityEngine.UI.Button;
-using UnityEngine.EventSystems;
-using UnityEngine.Events;
 using Unity.VisualScripting;
-using System.Windows.Forms;
 using Assets.Scripts.Resources;
+
+using Button = UnityEngine.UI.Button;
+using Image = UnityEngine.UI.Image;
+using Toggle = UnityEngine.UI.Toggle;
 
 public class SettingsScene : MonoBehaviour
 {
@@ -51,6 +46,8 @@ public class SettingsScene : MonoBehaviour
     public GameObject go_Accept;
     public GameObject go_Menu;
     #endregion
+
+    public Toggle toggle_HardDrop;
 
     public GameObject BindingTextbox;
     public GameObject SaveTextbox;
@@ -174,6 +171,8 @@ public class SettingsScene : MonoBehaviour
 
         FillDropDown(drp_Style);
         AssignDropDown(drp_Style, _settings.Style);
+
+        toggle_HardDrop.isOn = _settings.HardDrop;
     }
 
     public void InitialAssignKeys(GameObject container, KeyCode[] keys)
@@ -271,6 +270,8 @@ public class SettingsScene : MonoBehaviour
         emptyFields.Add(_settings.Menu.Any() ? null : "Back / Cancel");
 
         emptyFields.RemoveAll(e => e is null);
+
+        _settings.HardDrop = toggle_HardDrop.isOn;
 
         if (!emptyFields.Any())
         {
