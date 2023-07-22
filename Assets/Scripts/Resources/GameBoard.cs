@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameBoard
 {
@@ -38,6 +39,8 @@ public class GameBoard
     private const int _boardRow = 1;
 
     public bool clearingRows = false;
+    public bool heldBoxDrawn = false;
+    public bool nextBoxDrawn = false;
 
     public GameBoard()
     {
@@ -127,15 +130,16 @@ public class GameBoard
 
                 if (spacing == -1f)
                 {
-                    spacing = _gameSurface[x, y].GetComponent<SpriteRenderer>().bounds.size.x;
+                    spacing = Math.Min(_gameSurface[x, y].GetComponent<SpriteRenderer>().bounds.size.x, 0.49f);
                 }
+
 
                 // I _should_ only need to do this once, because this puts the sprites onto the visual surface.  I hope.
                 Vector3 vector = _gameSurface[x, y].transform.position;
                 vector.x = spacing * (x - ((playfieldWidth - 2) / 2));
                 vector.y = spacing * (y - (visibleHeight / 2));
                 _gameSurface[x, y].transform.position = vector;
-            }    
+            }
         }
     }
 
@@ -178,15 +182,6 @@ public class GameBoard
     public void SetMinoTexture (int x, int y, MinoEnum minoEnum, string style, string textureDirectory)
     {
         _gameSurface[x, y].GetComponent<SpriteRenderer>().sprite = Mino.GetSprite(_boardState[x, y], _style);
-
-        //string filename = $"{textureDirectory}//Mino_Empty.png";
-        //if (File.Exists(filename))
-        //{
-        //    // Really, I should cache the fuck out of this...  But it has to work first.
-        //    var texture = new Texture2D(1, 1);
-        //    texture.LoadImage(File.ReadAllBytes(filename));
-        //    _gameSurface[x, y].GetComponent<Renderer>().material.mainTexture = texture;
-        //}
     }
 
     public string[] SerializeGameBoard()
@@ -257,10 +252,45 @@ public class GameBoard
     {
         CleanUpGameObjects(_heldPiece);
 
+        if (!heldBoxDrawn && SceneManager.GetActiveScene().name == Constants.GetScene(Constants.Scene.PLAYFIELD))
+        {
+            // Seven blocks down, on the border.
+            var leftBorder = _gameSurface[0, visibleHeight - 7].transform.position;
+            leftBorder.x -= spacing / 2f + spacing * 4f;
+            leftBorder.y += spacing / 2f + spacing * 1f;
+
+            var endRow = 5;
+            var endCol = 5;
+
+            for (int row = 0; row < endRow + 1; ++ row)
+            {
+                for (int col = 0; col < endCol + 1; ++ col)
+                {
+                    if (row == 0 || row == endRow || col == 0 || col == endCol)
+                    {
+                        GameObject tile = Mino.CreateMino(MinoEnum.Border, _style, -1, -1, false);
+
+                        Vector3 vector = tile.transform.position;
+                        Vector3 scale = tile.transform.localScale;
+
+                        vector.x = leftBorder.x - scale.x / 2f + (scale.x * col);
+                        vector.y = leftBorder.y + scale.y / 2f - (scale.y * row);
+                        tile.transform.position = vector;
+
+                        heldBoxDrawn = true;
+                    }
+                }
+            }
+        }
+
         if (heldPiece.HasValue)
         {
-            float leftTile = playfieldWidth / 2 - 20;
-            float topTile = visibleHeight / 2 - 1;
+            var leftBorder = _gameSurface[0, visibleHeight - 7].transform.position;
+            leftBorder.x -= spacing / 2f + spacing * 2f;
+            leftBorder.y += spacing / 2f;
+
+            float leftTile = leftBorder.x;  // playfieldWidth / 2 - 20;
+            float topTile = leftBorder.y; // visibleHeight / 2 - 1;
 
             var pieceData = Tetrominos.GetPieceData(heldPiece.Value);
             var rotationData = pieceData.RotationData;
@@ -289,17 +319,49 @@ public class GameBoard
     {
         CleanUpGameObjects(_nextPieces);
 
+        int rightSide = -1;
+
+        if (!nextBoxDrawn && SceneManager.GetActiveScene().name == Constants.GetScene(Constants.Scene.PLAYFIELD))
+        {
+            // Seven blocks down, on the border.
+            var rightBorder = _gameSurface[playfieldWidth - 1, visibleHeight - 7].transform.position;
+            rightBorder.x += spacing / 2f + spacing * 4f;
+            rightBorder.y += spacing / 2f;
+
+            var endRow = visibleHeight;
+            var endCol = 8;
+
+            for (int row = 0; row < endRow + 1; ++ row)
+            {
+                for (int col = 0; col < endCol + 1; ++ col)
+                {
+                    if (row == 0 || row == endRow || col == 0 || col == endCol)
+                    {
+                        GameObject tile = Mino.CreateMino(MinoEnum.Border, _style, -1, -1, false);
+
+                        Vector3 vector = tile.transform.position;
+                        Vector3 scale = tile.transform.localScale;
+
+                        vector.x = rightBorder.x + scale.x / 2f + (scale.x * col);
+                        vector.y = rightBorder.y + scale.y / 2f - (scale.y * row);
+                        tile.transform.position = vector;
+
+                        nextBoxDrawn = true;
+                    }
+                }
+            }
+        }
+
+
         float leftTile = playfieldWidth / 2 + 10;
         float topTile = visibleHeight / 2 - 1;
-
-        int rightSide = -1;
 
         foreach (List<Piece> current in new List<List<Piece>>() { currentPieceBag, nextPieceBag })
         {
             leftTile += 6;
             ++rightSide;
 
-            for (int bagSlot = 0; bagSlot < current.Count; ++bagSlot)
+            for (int bagSlot = 0; bagSlot < Math.Min(11, current.Count); ++bagSlot)
             {
                 var pieceData = Tetrominos.GetPieceData(current[bagSlot]);
                 var rotationData = pieceData.RotationData;
