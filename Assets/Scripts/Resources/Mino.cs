@@ -31,9 +31,15 @@ public class Mino
 
     public static void CacheResourceMinos()
     {
+        // Gotta cache Original first, since it's there for if you have missing or unincluded minos in your style.
+        CacheResourceStyle("Original");
+
         foreach (string style in Constants._resourceStyles)
         {
-            CacheResourceStyle(style);
+            if (!style.Equals("Original"))
+            {
+                CacheResourceStyle(style);
+            }
         }
     }
 

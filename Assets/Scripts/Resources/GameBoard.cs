@@ -285,12 +285,8 @@ public class GameBoard
 
         if (heldPiece.HasValue)
         {
-            var leftBorder = _gameSurface[0, visibleHeight - 7].transform.position;
-            leftBorder.x -= spacing / 2f + spacing * 2f;
-            leftBorder.y += spacing / 2f;
-
-            float leftTile = leftBorder.x;  // playfieldWidth / 2 - 20;
-            float topTile = leftBorder.y; // visibleHeight / 2 - 1;
+            float leftTile = playfieldWidth / 2 - 20;
+            float topTile = visibleHeight / 2 - 1;
 
             var pieceData = Tetrominos.GetPieceData(heldPiece.Value);
             var rotationData = pieceData.RotationData;

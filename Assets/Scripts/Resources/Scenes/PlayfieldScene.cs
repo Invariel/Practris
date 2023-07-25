@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
 public class PlayfieldScene : MonoBehaviour
@@ -87,7 +88,6 @@ public class PlayfieldScene : MonoBehaviour
     }
 
     public void StyleChanged() => gameBoard.SetStyle(CurrentStyle);
-
 
     public void StartNewGame ()
     {
@@ -265,7 +265,11 @@ public class PlayfieldScene : MonoBehaviour
             HoldPiece(keysPressed);
         }
 
-        ShowRotations(keysPressed);
+        if (currentPiece is not null)
+        {
+            ShowRotations(keysPressed);
+        }
+
         TimeTravel(keysPressed);
     }
 

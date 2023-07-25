@@ -19,5 +19,5 @@ public class Settings
     public KeyCode[] Menu           { get; set; } = new KeyCode[] { KeyCode.Escape };
 
     public bool HardDrop            { get; set; } = true;   // Accept is a hard drop (locks piece) or a soft drop (plummets without locking).
-    public string Style             { get; set; } = "v2";
+    public string Style             { get; set; } = "Hearts";
 }
