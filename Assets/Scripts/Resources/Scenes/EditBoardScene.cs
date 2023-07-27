@@ -1,10 +1,14 @@
 using SFB;
+using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using Random = Unity.Mathematics.Random;
 
 public class EditBoardScene : MonoBehaviour
 {
@@ -15,6 +19,12 @@ public class EditBoardScene : MonoBehaviour
     MinoEnum? minoClickedOriginalState = null;
     Point? minoLastHovered = null;
 
+    private bool changingGarbageLines = false;
+    public TMP_InputField garbageRowsInput;
+
+    private Random random;
+
+
     public void Awake()
     {
         Application.targetFrameRate = 60;
@@ -23,6 +33,9 @@ public class EditBoardScene : MonoBehaviour
         userInput.SaveSettingsToFile();
 
         StartNewGame();
+
+        random = new Random();
+        random.InitState();
     }
 
     public void StartNewGame()
@@ -145,6 +158,55 @@ public class EditBoardScene : MonoBehaviour
         }
     }
 #nullable disable
+
+    public void InputFieldChanged()
+    {
+        if (!int.TryParse(garbageRowsInput.text, out int value))
+        {
+            value = Math.Max(0, Math.Min(value, 18));
+            garbageRowsInput.text = "0";
+        }
+        else
+        {
+            int clipped = Math.Max(0, Math.Min(value, 18));
+            if (value != clipped)
+            {
+                garbageRowsInput.text = clipped.ToString();
+            }
+        }
+    }
+
+    public void GenerateGarbage()
+    {
+        ClearBoard();
+
+        MinoEnum[,] board = gameBoard._boardState;
+
+        if (int.TryParse(garbageRowsInput.text, out int lines))
+        {
+            lines = Math.Max(0, Math.Min(lines, 18));
+
+            for (int y = 1; y < lines; ++y)
+            {
+                bool hasGap = false;
+                for (int x = 1; x < board.GetLength(0) - 1; ++x)
+                {
+                    if (x == board.GetLength(0) - 1 && !hasGap)
+                    {
+                        board[x, y] = MinoEnum.Empty;
+                    }
+                    else if (random.NextBool())
+                    {
+                        board[x, y] = MinoEnum.Preset;
+                    }
+                    else
+                    {
+                        hasGap = true;
+                    }
+                }
+            }
+        }
+    }
 
     public void SaveBoardState()
     {
