@@ -9,7 +9,7 @@ public static class Constants
     {
         get
         {
-            List<string> styles = new List<string> { "Original", "v2", "v3", "v4", "Way Too Grey", "Hearts", "Mostly Dark" };
+            List<string> styles = new List<string> { "Original", "v2", "v3", "v4", "Way Too Grey", "Hearts", "Hearts v2", "Mostly Dark" };
             return styles.OrderBy(a => a.ToLowerInvariant()).ToArray();
         }
     }
