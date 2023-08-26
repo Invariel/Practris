@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -91,16 +92,17 @@ public class PlayfieldScene : MonoBehaviour
 
     public void StartNewGame ()
     {
-        gameBoard = new GameBoard(gameSettings.Style);
-        
-        gameBoard.MakeBoard(StaticData.editedGameBoard);
-        gameBoard.DrawGameBoard();
-
-        StaticData.editedGameBoard = null;
+        if (gameBoard is not null)
+        {
+            gameBoard.ClearGameSurface();
+            gameBoard.CleanUpGameObjects(gameBoard._nextPieces);
+            gameBoard.CleanUpGameObjects(gameBoard._heldPiece);
+        }
 
         currentPieceBag = PieceBagManager.GeneratePieceBag();
         nextPieceBag = PieceBagManager.GeneratePieceBag();
 
+        currentPiece = null;
         heldPiece = null;
         linesCleared = 0;
         UpdateLinesCleared();
@@ -112,6 +114,13 @@ public class PlayfieldScene : MonoBehaviour
         txt_RotationData.text = "";
 
         gameState = GameState.None;
+
+        gameBoard = new GameBoard(gameSettings.Style);
+        
+        gameBoard.MakeBoard(StaticData.editedGameBoard);
+        gameBoard.DrawGameBoard();
+
+        StaticData.editedGameBoard = null;
     }
 
     public void EnqueueGameState(MinoEnum[,] gameState, Piece piece, Piece? held)
