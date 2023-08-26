@@ -99,6 +99,26 @@ public class GameBoard
         }
     }
 
+    public void ClearGameSurface()
+    {
+        if (_gameSurface is null)
+        {
+            return;
+        }
+
+        for (int x = 0; x < _gameSurface.GetLength(0); ++x)
+        {
+            for (int y = 0; y < _gameSurface.GetLength(1); ++y)
+            {
+                if (_gameSurface[x, y] is GameObject obj)
+                {
+                    MonoBehaviour.Destroy(obj);
+                }
+            }
+        }
+    }
+
+
     private void InitializeGameSurface()
     {
         if (_boardState is null)
